@@ -1,0 +1,26 @@
+---
+description: Load all configuration through a Pydantic Settings class; never use os.getenv directly
+globs: **/*.py
+alwaysApply: false
+---
+
+# Rule: Configuration via pydantic-settings
+
+Never use `os.getenv()` or `os.environ` directly in application code.
+
+All configuration must flow through a Pydantic Settings class:
+
+```python
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    database_url: str
+    redis_url: str = "redis://localhost:6379"
+    debug: bool = False
+
+    model_config = SettingsConfigDict(env_file=".env")
+```
+
+Inject settings via FastAPI's dependency injection, never import the instance directly in route handlers.
+
+Why: scattered getenv calls are untestable, untyped, and invisible to static analysis. A Settings class gives you validation on startup, type safety, .env support, and a single source of truth.
