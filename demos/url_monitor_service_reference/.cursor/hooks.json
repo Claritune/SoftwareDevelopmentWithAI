@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": ".cursor/hooks/no-default-args.sh",
+        "timeout": 120,
+        "loop_limit": 5
+      }
+    ]
+  }
+}

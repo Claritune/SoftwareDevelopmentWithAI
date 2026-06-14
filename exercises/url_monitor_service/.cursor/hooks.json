@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSkillUsed": [
+      {
+        "command": ".cursor/hooks/before-skill-used.sh",
+        "timeout": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/pytest-on-save.sh",
+        "timeout": 120
+      }
+    ]
+  }
+}

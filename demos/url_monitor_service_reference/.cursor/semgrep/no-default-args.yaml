@@ -1,0 +1,18 @@
+rules:
+  - id: no-default-args
+    pattern-either:
+      - pattern: |
+          def $FUNC(..., $ARG=$DEFAULT, ...):
+              ...
+      - pattern: |
+          async def $FUNC(..., $ARG=$DEFAULT, ...):
+              ...
+      - pattern: |
+          def $FUNC(..., $ARG: $TYPE = $DEFAULT, ...):
+              ...
+      - pattern: |
+          async def $FUNC(..., $ARG: $TYPE = $DEFAULT, ...):
+              ...
+    message: "Default argument values are not allowed"
+    languages: [python]
+    severity: WARNING
