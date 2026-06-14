@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS monitors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT NOT NULL UNIQUE,
     display_name TEXT,
+    tags TEXT,
     enabled INTEGER NOT NULL DEFAULT 1,
     check_interval_seconds INTEGER NOT NULL DEFAULT 60,
     timeout_seconds INTEGER NOT NULL DEFAULT 10,

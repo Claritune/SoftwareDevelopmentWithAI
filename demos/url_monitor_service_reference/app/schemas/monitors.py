@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import TypedDict
 
@@ -14,6 +15,7 @@ class MonitorRow(TypedDict):
     id: int
     url: str
     display_name: str | None
+    tags: list[str]
     enabled: int
     check_interval_seconds: int
     timeout_seconds: int
@@ -28,6 +30,7 @@ class MonitorRow(TypedDict):
 class MonitorCreate(BaseModel):
     url: HttpUrl
     display_name: str | None = None
+    tags: list[str] | None = None
     check_interval_seconds: int | None = None
     timeout_seconds: int | None = None
     failure_threshold: int | None = None
@@ -37,6 +40,7 @@ class MonitorCreate(BaseModel):
 class MonitorUpdate(BaseModel):
     url: HttpUrl | None = None
     display_name: str | None = None
+    tags: list[str] | None = None
     check_interval_seconds: int | None = None
     timeout_seconds: int | None = None
     failure_threshold: int | None = None
@@ -47,6 +51,7 @@ class MonitorResponse(BaseModel):
     id: int
     url: str
     display_name: str | None
+    tags: list[str]
     enabled: bool
     check_interval_seconds: int
     timeout_seconds: int
@@ -65,11 +70,18 @@ class PaginatedMonitors(BaseModel):
     offset: int
 
 
+def _tags_from_db(raw: str | None) -> list[str]:
+    if raw is None:
+        return []
+    return json.loads(raw)
+
+
 def row_to_monitor_row(row) -> MonitorRow:
     return MonitorRow(
         id=row["id"],
         url=row["url"],
         display_name=row["display_name"],
+        tags=_tags_from_db(row["tags"]),
         enabled=row["enabled"],
         check_interval_seconds=row["check_interval_seconds"],
         timeout_seconds=row["timeout_seconds"],
@@ -87,6 +99,7 @@ def row_to_response(row: MonitorRow) -> MonitorResponse:
         id=row["id"],
         url=row["url"],
         display_name=row["display_name"],
+        tags=row["tags"],
         enabled=bool(row["enabled"]),
         check_interval_seconds=row["check_interval_seconds"],
         timeout_seconds=row["timeout_seconds"],

@@ -1,0 +1,29 @@
+---
+description: Coordinator agent — background tick loop, due monitors, concurrent checks
+alwaysApply: false
+---
+
+# Coordinator agent
+
+You own background scheduling: poll enabled monitors on a tick, fan out due checks, respect per-monitor intervals.
+
+## Scope
+
+- `app/services/scheduler.py`
+- `app/main.py` — lifespan wiring for httpx client and scheduler start/stop (pragmatic: edit freely when scheduler integration changes)
+- `app/repositories/monitors.py` — due-check helpers only (`list_enabled_monitors`, `is_monitor_due`, `get_monitors_due_for_check`)
+- `tests/test_scheduler.py`
+
+## Do not modify
+
+- State machine logic in `app/services/checker.py` (call it; do not reimplement)
+- Monitor CRUD routes or CRUD repo functions
+- History or summary API routes
+
+## Before finishing
+
+Run: `uv run pytest tests/test_scheduler.py -v`
+
+## Cross-module changes
+
+Scheduler orchestrates `process_monitor_check` from Check Engine. If checker behavior must change, invoke `@check-engine` instead of duplicating logic here.

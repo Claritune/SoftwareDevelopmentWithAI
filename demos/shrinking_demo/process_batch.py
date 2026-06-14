@@ -36,13 +36,13 @@ def process_batch(items: list[int]) -> list[int]:
     return items
 
 
-if __name__ == "__main__":
-    # These all work fine
-    print("Normalizing [200, 300, 400]:", process_batch([200, 300, 400]))
-    print("Normalizing [0, 50, 100]:   ", process_batch([0, 50, 100]))
-    print("Normalizing [150]:          ", process_batch([150]))
-    print("Normalizing []:             ", process_batch([]))
-    print("Normalizing [0, 250, 500]:  ", process_batch([0, 250, 500]))
+# if __name__ == "__main__":
+#     # These all work fine
+#     print("Normalizing [200, 300, 400]:", process_batch([200, 300, 400]))
+#     print("Normalizing [0, 50, 100]:   ", process_batch([0, 50, 100]))
+#     print("Normalizing [150]:          ", process_batch([150]))
+#     print("Normalizing []:             ", process_batch([]))
+#     print("Normalizing [0, 250, 500]:  ", process_batch([0, 250, 500]))
 
-    # This crashes — but why?
-    print("Normalizing [200, 200, 200]:", process_batch([200, 200, 200]))
+#     # This crashes — but why?
+#     print("Normalizing [200, 200, 200]:", process_batch([200, 200, 200]))

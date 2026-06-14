@@ -59,6 +59,36 @@ async def test_delete_monitor(client):
 
 
 @pytest.mark.anyio
+async def test_create_monitor_with_tags(client):
+    resp = await client.post(
+        "/api/v1/monitors",
+        json={"url": "https://example.com", "tags": ["prod", "api"]},
+    )
+    assert resp.status_code == 201
+    assert resp.json()["tags"] == ["prod", "api"]
+
+
+@pytest.mark.anyio
+async def test_create_monitor_without_tags_returns_empty_list(client):
+    resp = await client.post("/api/v1/monitors", json={"url": "https://example.com"})
+    assert resp.status_code == 201
+    assert resp.json()["tags"] == []
+
+
+@pytest.mark.anyio
+async def test_update_monitor_tags(client):
+    create_resp = await client.post("/api/v1/monitors", json={"url": "https://example.com"})
+    monitor_id = create_resp.json()["id"]
+
+    resp = await client.patch(
+        f"/api/v1/monitors/{monitor_id}",
+        json={"tags": ["staging"]},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["tags"] == ["staging"]
+
+
+@pytest.mark.anyio
 async def test_duplicate_url_returns_conflict(client):
     await client.post("/api/v1/monitors", json={"url": "https://example.com"})
     resp = await client.post("/api/v1/monitors", json={"url": "https://example.com"})

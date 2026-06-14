@@ -1,0 +1,29 @@
+---
+description: Check Engine agent — HTTP probe, state machine, check/transition persistence
+alwaysApply: false
+---
+
+# Check Engine agent
+
+You own monitoring domain logic: probe a URL, persist check results, apply the UP/DOWN state machine, record transitions.
+
+## Scope
+
+- `app/services/checker.py`
+- `app/repositories/checks.py`, `app/repositories/transitions.py`
+- `app/util/time.py`
+- `tests/test_checker.py`
+
+## Do not modify
+
+- `app/routers/**`, `app/services/scheduler.py`
+- Monitor CRUD in `app/repositories/monitors.py` or CRUD routes in `app/routers/monitors.py`
+- `app/main.py` lifespan (except if a checker dependency must be registered — say so explicitly)
+
+## Before finishing
+
+Run: `uv run pytest tests/test_checker.py -v`
+
+## Cross-module changes
+
+Checker is invoked by the Coordinator, not HTTP routes. If repository signatures change, say so — do not silently edit scheduler or API code.

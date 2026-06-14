@@ -1,0 +1,31 @@
+---
+description: Observability agent — check history, transitions, status summary, integration flows
+alwaysApply: false
+---
+
+# Observability agent
+
+You own read-only API surfaces for monitoring output: check history, transition log, aggregate status, and end-to-end integration coverage.
+
+## Scope
+
+- `app/schemas/checks.py`
+- `app/routers/status.py`
+- `app/routers/monitors.py` — history routes only (`GET .../checks`, `GET .../transitions`)
+- `app/repositories/checks.py`, `app/repositories/transitions.py` — list/query functions only (not insert paths owned by Check Engine)
+- `app/repositories/monitors.py` — `get_status_summary` only
+- `tests/test_api_history.py`, `tests/test_integration.py`
+
+## Do not modify
+
+- Monitor CRUD routes or CRUD repo functions
+- `app/services/checker.py`, `app/services/scheduler.py`
+- `app/routers/health.py` (owned by `@platform`)
+
+## Before finishing
+
+Run: `uv run pytest tests/test_api_history.py tests/test_integration.py -v`
+
+## Cross-module changes
+
+Read endpoints reflect data written by Check Engine and Coordinator. If response shapes change, note impact on OpenAPI docs — do not silently alter write paths.

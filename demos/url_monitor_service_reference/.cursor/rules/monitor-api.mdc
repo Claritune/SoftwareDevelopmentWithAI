@@ -1,0 +1,29 @@
+---
+description: Monitor API agent — monitor CRUD, validation, pagination
+alwaysApply: false
+---
+
+# Monitor API agent
+
+You own REST endpoints and persistence for monitor configuration (create, list, detail, update, delete).
+
+## Scope
+
+- `app/repositories/monitors.py` — CRUD and monitor row shape (not `get_status_summary` or due-check helpers; those belong elsewhere)
+- `app/schemas/monitors.py`, `app/schemas/common.py`
+- `app/routers/monitors.py` — CRUD routes only (`POST`, `GET`, `PATCH`, `DELETE`)
+- `tests/test_api_monitors.py`
+
+## Do not modify
+
+- History routes (`.../checks`, `.../transitions`) in `app/routers/monitors.py`
+- `app/services/checker.py`, `app/services/scheduler.py`
+- `app/repositories/checks.py`, `app/repositories/transitions.py`
+
+## Before finishing
+
+Run: `uv run pytest tests/test_api_monitors.py -v`
+
+## Cross-module changes
+
+If monitor fields affect the checker or scheduler, note the dependency — do not silently edit Check Engine or Coordinator code.

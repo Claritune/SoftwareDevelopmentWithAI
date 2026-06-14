@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import aiosqlite
@@ -17,12 +18,13 @@ from app.util.time import utc_now
 async def create_monitor(conn: aiosqlite.Connection, data: MonitorCreate, settings: Settings) -> MonitorRow:
     now = utc_now()
     await conn.execute(
-        """INSERT INTO monitors (url, display_name, enabled, check_interval_seconds,
+        """INSERT INTO monitors (url, display_name, tags, enabled, check_interval_seconds,
            timeout_seconds, failure_threshold, status, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             str(data.url),
             data.display_name,
+            json.dumps(data.tags) if data.tags is not None else None,
             int(data.enabled),
             data.check_interval_seconds or settings.default_check_interval_seconds,
             data.timeout_seconds or settings.default_timeout_seconds,
@@ -78,6 +80,9 @@ async def update_monitor(
     if data.display_name is not None:
         fields.append("display_name = ?")
         values.append(data.display_name)
+    if data.tags is not None:
+        fields.append("tags = ?")
+        values.append(json.dumps(data.tags))
     if data.check_interval_seconds is not None:
         fields.append("check_interval_seconds = ?")
         values.append(data.check_interval_seconds)

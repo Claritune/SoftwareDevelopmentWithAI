@@ -144,7 +144,3 @@ async def list_transitions_endpoint(
         limit=pagination.limit,
         offset=pagination.offset,
     )
-
-
-def test(value: int) -> int:
-    return value
