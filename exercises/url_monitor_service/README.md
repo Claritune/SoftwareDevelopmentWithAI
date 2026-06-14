@@ -23,21 +23,9 @@ Before running `/question`, configure Cursor so the agent has the right guardrai
 
 ### Skills (QRSPI workflow)
 
-Copy the QRSPI skills from the CLI demo and adjust if needed:
+If you are using Cursor you should already see the QRSPI skills installed
+If not, you can copy the QRSPI skills from `../docs/skills/` or use them directly as prompts
 
-```bash
-mkdir -p .cursor/skills
-cp -r ../.cursor/skills/question  .cursor/skills/
-cp -r ../.cursor/skills/research  .cursor/skills/
-cp -r ../.cursor/skills/design    .cursor/skills/
-cp -r ../.cursor/skills/structure .cursor/skills/
-cp -r ../.cursor/skills/plan      .cursor/skills/
-cp -r ../.cursor/skills/implement .cursor/skills/
-cp -r ../.cursor/skills/worktree  .cursor/skills/
-cp -r ../.cursor/skills/pr        .cursor/skills/
-```
-
-Optional: copy `../docs/skills/` as human-readable reference prompts.
 
 | Skill | Command | When to use |
 |-------|---------|-------------|
