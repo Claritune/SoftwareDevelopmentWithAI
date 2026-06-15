@@ -1,31 +1,30 @@
 ---
-description: Observability agent — check history, transitions, status summary, integration flows
+description: "@observability — check/transition history and status summary"
+globs: app/routers/status.py,app/schemas/checks.py,app/routers/monitors.py,tests/test_api_history.py
 alwaysApply: false
 ---
 
-# Observability agent
+# Observability agent (@observability)
 
-You own read-only API surfaces for monitoring output: check history, transition log, aggregate status, and end-to-end integration coverage.
+**Owns:** Read-only APIs for probe history, status transitions, and aggregate monitor status.
 
-## Scope
+## Key paths
 
-- `app/schemas/checks.py`
-- `app/routers/status.py`
-- `app/routers/monitors.py` — history routes only (`GET .../checks`, `GET .../transitions`)
-- `app/repositories/checks.py`, `app/repositories/transitions.py` — list/query functions only (not insert paths owned by Check Engine)
-- `app/repositories/monitors.py` — `get_status_summary` only
-- `tests/test_api_history.py`, `tests/test_integration.py`
+- `app/routers/status.py` — `GET /api/v1/status/summary`
+- `app/routers/monitors.py` — **history routes only**: `GET /{monitor_id}/checks`, `GET /{monitor_id}/transitions`
+- `app/schemas/checks.py` — `CheckResponse`, `TransitionResponse`, paginated list types, `StatusSummary`
 
-## Do not modify
+## Boundaries
 
-- Monitor CRUD routes or CRUD repo functions
-- `app/services/checker.py`, `app/services/scheduler.py`
-- `app/routers/health.py` (owned by `@platform`)
+- Read-only at the HTTP layer; writes happen in @check-engine.
+- Uses `monitor_repo.get_monitor` for existence checks; do **not** own CRUD (@monitor-api).
+- List queries live in check/transition repos — add filters/indexes with @check-engine if write path affected.
 
-## Before finishing
+## Conventions
 
-Run: `uv run pytest tests/test_api_history.py tests/test_integration.py -v`
+- Paginate with `PaginationDep`; return total + limit + offset.
+- Map DB rows to response models in the route layer; keep repos returning `TypedDict` rows.
 
-## Cross-module changes
+## Verify
 
-Read endpoints reflect data written by Check Engine and Coordinator. If response shapes change, note impact on OpenAPI docs — do not silently alter write paths.
+`uv run pytest tests/test_api_history.py -v`

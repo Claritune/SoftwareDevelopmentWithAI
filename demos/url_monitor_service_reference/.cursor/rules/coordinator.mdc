@@ -1,29 +1,30 @@
 ---
-description: Coordinator agent — background tick loop, due monitors, concurrent checks
+description: "@coordinator — background scheduler and due-monitor fan-out"
+globs: app/services/scheduler.py,tests/test_scheduler.py
 alwaysApply: false
 ---
 
-# Coordinator agent
+# Coordinator agent (@coordinator)
 
-You own background scheduling: poll enabled monitors on a tick, fan out due checks, respect per-monitor intervals.
+**Owns:** Background asyncio loop, due-monitor selection, concurrent check fan-out via `TaskGroup`, lifespan scheduler wiring.
 
-## Scope
+## Key paths
 
-- `app/services/scheduler.py`
-- `app/main.py` — lifespan wiring for httpx client and scheduler start/stop (pragmatic: edit freely when scheduler integration changes)
-- `app/repositories/monitors.py` — due-check helpers only (`list_enabled_monitors`, `is_monitor_due`, `get_monitors_due_for_check`)
-- `tests/test_scheduler.py`
+- `app/services/scheduler.py` — `get_monitors_due_for_check` (or delegate to monitor repo), `run_cycle`, `start_scheduler`, `stop_scheduler`.
+- `app/main.py` **lifespan only** — create shared `httpx.AsyncClient`, start/stop scheduler task alongside DB lifecycle.
 
-## Do not modify
+## Boundaries
 
-- State machine logic in `app/services/checker.py` (call it; do not reimplement)
-- Monitor CRUD routes or CRUD repo functions
-- History or summary API routes
+- Delegates each check to `@check-engine` `process_monitor_check`; do **not** duplicate probe or state-machine logic.
+- Do **not** add REST endpoints.
+- Respects `enabled`, per-monitor `check_interval_seconds`, and `settings.coordinator_tick_seconds`.
+- Disabled or deleted monitors must not be checked.
 
-## Before finishing
+## Conventions
 
-Run: `uv run pytest tests/test_scheduler.py -v`
+- One long-lived asyncio task; sleep between ticks; cancel cleanly on shutdown.
+- `TaskGroup` for concurrent checks within a cycle; failures in one check must not abort the group.
 
-## Cross-module changes
+## Verify
 
-Scheduler orchestrates `process_monitor_check` from Check Engine. If checker behavior must change, invoke `@check-engine` instead of duplicating logic here.
+`uv run pytest tests/test_scheduler.py -v`

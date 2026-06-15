@@ -2,6 +2,13 @@ import pytest
 
 
 @pytest.mark.anyio
+async def test_hello_world(client):
+    resp = await client.get("/api/v1/monitors/hello-world")
+    assert resp.status_code == 200
+    assert resp.json() == {"message": "hello-world"}
+
+
+@pytest.mark.anyio
 async def test_create_monitor_returns_unknown_status(client):
     resp = await client.post("/api/v1/monitors", json={"url": "https://example.com"})
     assert resp.status_code == 201

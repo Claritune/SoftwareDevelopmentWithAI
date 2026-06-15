@@ -1,29 +1,41 @@
 ---
-description: Check Engine agent — HTTP probe, state machine, check/transition persistence
+description: "@check-engine — HTTP probe and UP/DOWN state machine"
+globs: app/services/checker.py,app/repositories/checks.py,app/repositories/transitions.py,tests/test_checker.py
 alwaysApply: false
 ---
 
-# Check Engine agent
+# Check Engine agent (@check-engine)
 
-You own monitoring domain logic: probe a URL, persist check results, apply the UP/DOWN state machine, record transitions.
+**Owns:** Probing URLs with httpx, persisting check rows, consecutive-failure counter, status transitions.
 
-## Scope
+## Key paths
 
-- `app/services/checker.py`
-- `app/repositories/checks.py`, `app/repositories/transitions.py`
-- `app/util/time.py`
-- `tests/test_checker.py`
+- `app/services/checker.py` — `check_url`, `process_monitor_check` (probe → insert check → state machine → update monitor).
+- `app/repositories/checks.py` — append-only check history writes + list (list queries shared with @observability).
+- `app/repositories/transitions.py` — transition writes + list.
 
-## Do not modify
+## State machine
 
-- `app/routers/**`, `app/services/scheduler.py`
-- Monitor CRUD in `app/repositories/monitors.py` or CRUD routes in `app/routers/monitors.py`
-- `app/main.py` lifespan (except if a checker dependency must be registered — say so explicitly)
+| Event | From | Result |
+|-------|------|--------|
+| Probe success | `UNKNOWN` or `DOWN` | → `UP`, record transition |
+| Probe success | `UP` | stay `UP`, reset failures |
+| Probe failure | any | increment `consecutive_failures` |
+| Failures ≥ threshold | `UP` or `UNKNOWN` | → `DOWN`, record transition |
 
-## Before finishing
+Default threshold: 3. One success flips `DOWN` → `UP`.
 
-Run: `uv run pytest tests/test_checker.py -v`
+## Boundaries
 
-## Cross-module changes
+- Callable without the scheduler; @coordinator orchestrates when checks run.
+- Do **not** add API routes or scheduler tick logic here.
+- HTTP status ≥ 400 counts as failure; use monitor's `timeout_seconds`.
 
-Checker is invoked by the Coordinator, not HTTP routes. If repository signatures change, say so — do not silently edit scheduler or API code.
+## Conventions
+
+- Accept `httpx.AsyncClient` and `aiosqlite.Connection` as arguments — no hidden globals.
+- Update `last_checked_at` on the monitor row after each check.
+
+## Verify
+
+`uv run pytest tests/test_checker.py -v`

@@ -1,0 +1,13 @@
+---
+description: Domain exceptions and global handlers; routes raise, never catch
+globs: app/**/*.py
+alwaysApply: false
+---
+
+# Structured error responses
+
+1. Domain exceptions in `app/exceptions.py` (`AppError`, `NotFoundError`, `ConflictError`, …).
+2. Global handlers registered in `app/main.py` (@platform).
+3. Route handlers **raise** — no try/except except mapping `IntegrityError` → `ConflictError`.
+
+Response shape: `{"error": "<CODE>", "message": "<human readable>"}` including 422 validation errors.

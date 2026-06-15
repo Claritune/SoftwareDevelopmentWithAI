@@ -1,0 +1,42 @@
+---
+description: Module map and agent handoff for the URL Monitor service
+alwaysApply: true
+---
+
+# URL Monitor — module agents
+
+Five logical modules share one flat `app/` tree. Each has a scoped rule (auto-attached via globs) and an **@ tag** for explicit handoff.
+
+| Tag | Module | Rule file |
+|-----|--------|-----------|
+| `@platform` | Bootstrap, settings, DB, errors, health | `platform.mdc` |
+| `@monitor-api` | Monitor CRUD & validation | `monitor-api.mdc` |
+| `@check-engine` | HTTP probe & UP/DOWN state machine | `check-engine.mdc` |
+| `@coordinator` | Background tick loop & due-monitor fan-out | `coordinator.mdc` |
+| `@observability` | Check/transition history & status summary | `observability.mdc` |
+
+Full architecture: `ARCHITECTURE.md`.
+
+## Handoff
+
+- Use **@ tags** when the task clearly belongs to one module or when switching context (e.g. “@check-engine add TLS verify option”).
+- When a change crosses modules, pick a **lead module** (where most edits land) and list other tags to consult — do not edit another module's files without stating why.
+- Shared files (`app/main.py`, `app/routers/monitors.py`): only the owning sections listed in each module rule.
+
+## Cross-cutting (all modules)
+
+- No default values on **function parameters** (see `AGENTS.md`; semgrep hook).
+- Config via Pydantic Settings + DI (`pydantic-settings.mdc`).
+- Async I/O end-to-end; async tests with `httpx` + `ASGITransport` (`async-consistency.mdc`).
+- Routes raise domain exceptions; handlers live in `app/main.py` (`structured-errors.mdc`).
+
+## Test ownership
+
+| Module | Tests |
+|--------|-------|
+| Platform | `tests/conftest.py`, `tests/test_health.py` |
+| Monitor API | `tests/test_api_monitors.py` |
+| Check Engine | `tests/test_checker.py` |
+| Coordinator | `tests/test_scheduler.py` |
+| Observability | `tests/test_api_history.py` |
+| Cross-cutting | `tests/test_integration.py` — lead **@platform**, involve others as needed |

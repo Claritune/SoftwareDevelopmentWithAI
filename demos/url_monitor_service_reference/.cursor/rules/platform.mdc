@@ -1,30 +1,33 @@
 ---
-description: Platform agent — app bootstrap, config, DB init, errors, health probes
+description: "@platform — bootstrap, settings, DB, errors, health"
+globs: app/main.py,app/settings.py,app/dependencies.py,app/exceptions.py,app/db/**,app/routers/health.py,app/util/**,tests/conftest.py,tests/test_health.py,tests/test_integration.py
 alwaysApply: false
 ---
 
-# Platform agent
+# Platform agent (@platform)
 
-You own the runnable skeleton: settings, database lifecycle, shared dependencies, structured errors, and health/readiness endpoints.
+**Owns:** app startup/shutdown, configuration, SQLite connection & schema, shared DI, domain exceptions, global error handlers, health/readiness, test fixtures.
 
-## Scope
+## Key paths
 
-- `app/main.py` — app factory, exception handlers, lifespan (DB and httpx client; coordinate with `@coordinator` for scheduler wiring)
-- `app/settings.py`, `app/exceptions.py`, `app/dependencies.py`
-- `app/db/connection.py`, `app/db/schema.sql`, `app/db/helpers.py`
-- `app/routers/health.py`
-- `tests/conftest.py`, `tests/test_health.py`
+- `app/main.py` — `create_app()`, exception handlers, router registration; **lifespan DB/client setup only** (scheduler wiring is @coordinator).
+- `app/settings.py`, `app/dependencies.py`, `app/exceptions.py`
+- `app/db/` — connection, schema, helpers
+- `app/routers/health.py` — `GET /health`, `GET /ready`
+- `app/util/` — shared helpers (e.g. time)
 
-## Do not modify
+## Boundaries
 
-- `app/services/checker.py`, `app/services/scheduler.py`
-- Monitor CRUD or history routes in `app/routers/monitors.py`
-- `app/routers/status.py`
+- Do **not** add monitor CRUD, check logic, scheduler loops, or history routes here.
+- Schema changes: coordinate with repos in @monitor-api, @check-engine, @observability.
+- Register new routers in `create_app()`; implement routes in the owning module.
 
-## Before finishing
+## Conventions
 
-Run: `uv run pytest tests/test_health.py -v`
+- `Settings(BaseSettings)` + `get_settings()`; inject via `SettingsDep`, never `os.getenv()`.
+- `DbConn` dependency reads `request.app.state.db`.
+- Handlers return `{"error", "message"}` JSON for `AppError` and 422 validation.
 
-## Cross-module changes
+## Verify
 
-If schema changes are required, say so explicitly — Check Engine and Monitor API repos may need follow-up.
+`uv run pytest tests/test_health.py -v`

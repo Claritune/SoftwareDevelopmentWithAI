@@ -1,0 +1,13 @@
+---
+description: Async I/O in routes and async httpx tests
+globs: app/**/*.py,tests/**/*.py
+alwaysApply: false
+---
+
+# Async consistency
+
+- Route handlers that do I/O: `async def` + async libraries (`aiosqlite`, `httpx.AsyncClient`).
+- Never block the event loop inside `async def` (no sync `sqlite3`, `requests`, etc.).
+- Tests: `@pytest.mark.anyio` + `httpx.AsyncClient` with `ASGITransport` — not sync `TestClient` for async routes.
+
+This project uses `aiosqlite` + raw SQL repos instead of asyncpg/SQLAlchemy; same principle applies.

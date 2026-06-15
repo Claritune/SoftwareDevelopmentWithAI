@@ -1,26 +1,15 @@
 ---
-description: Load all configuration through a Pydantic Settings class; never use os.getenv directly
-globs: **/*.py
+description: Configuration via Pydantic Settings; never os.getenv in app code
+globs: app/**/*.py
 alwaysApply: false
 ---
 
-# Rule: Configuration via pydantic-settings
+# Configuration via pydantic-settings
 
-Never use `os.getenv()` or `os.environ` directly in application code.
+Never use `os.getenv()` or `os.environ` in `app/` modules.
 
-All configuration must flow through a Pydantic Settings class:
+All config flows through `Settings(BaseSettings)` in `app/settings.py`. Inject via `SettingsDep` / `get_settings()` in dependencies — not direct imports in route bodies.
 
-```python
-from pydantic_settings import BaseSettings, SettingsConfigDict
+Why: one typed, validated source of truth; testable via env monkeypatch + `get_settings.cache_clear()`.
 
-class Settings(BaseSettings):
-    database_url: str
-    redis_url: str = "redis://localhost:6379"
-    debug: bool = False
-
-    model_config = SettingsConfigDict(env_file=".env")
-```
-
-Inject settings via FastAPI's dependency injection, never import the instance directly in route handlers.
-
-Why: scattered getenv calls are untestable, untyped, and invisible to static analysis. A Settings class gives you validation on startup, type safety, .env support, and a single source of truth.
+Note: the no-default-args project rule applies to **function parameters**, not Pydantic model fields on `Settings`.

@@ -1,5 +1,19 @@
 *IMPORTANT* In case the goal of the task is not completely clear or can be interpreted as ambiguous ask me what exactly needs to be done
 
+## Module agents
+
+The service is split into five logical modules. Each has a Cursor rule in `.cursor/rules/` that scopes ownership by file globs and documents an **@ tag** for explicit handoff.
+
+| Tag | Responsibility |
+|-----|----------------|
+| `@platform` | Bootstrap, settings, DB, errors, health |
+| `@monitor-api` | Monitor CRUD & validation |
+| `@check-engine` | HTTP probe & UP/DOWN state machine |
+| `@coordinator` | Background scheduler |
+| `@observability` | History & status summary |
+
+See `.cursor/rules/modules-overview.mdc` and `ARCHITECTURE.md` for boundaries, shared files, and test ownership.
+
 ## Hooks
 
 ### `stop` — no default function arguments (semgrep)

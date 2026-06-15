@@ -51,6 +51,11 @@ async def list_monitors_endpoint(
     )
 
 
+@router.get("/hello-world")
+async def hello_world_endpoint() -> dict[str, str]:
+    return {"message": "hello-world"}
+
+
 @router.get("/{monitor_id}", response_model=MonitorResponse)
 async def get_monitor_endpoint(
     monitor_id: int,

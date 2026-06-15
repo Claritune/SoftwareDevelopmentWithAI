@@ -1,29 +1,31 @@
 ---
-description: Monitor API agent — monitor CRUD, validation, pagination
+description: "@monitor-api — monitor CRUD, validation, pagination"
+globs: app/routers/monitors.py,app/repositories/monitors.py,app/schemas/monitors.py,app/schemas/common.py,tests/test_api_monitors.py
 alwaysApply: false
 ---
 
-# Monitor API agent
+# Monitor API agent (@monitor-api)
 
-You own REST endpoints and persistence for monitor configuration (create, list, detail, update, delete).
+**Owns:** REST CRUD for monitors, request/response schemas, monitor repository, pagination for list endpoints.
 
-## Scope
+## Key paths
 
-- `app/repositories/monitors.py` — CRUD and monitor row shape (not `get_status_summary` or due-check helpers; those belong elsewhere)
-- `app/schemas/monitors.py`, `app/schemas/common.py`
-- `app/routers/monitors.py` — CRUD routes only (`POST`, `GET`, `PATCH`, `DELETE`)
-- `tests/test_api_monitors.py`
+- `app/repositories/monitors.py` — create, list, get, update, delete; `get_monitors_due_for_check` is read by @coordinator (change with care).
+- `app/schemas/monitors.py`, `app/schemas/common.py` — `MonitorCreate`, `MonitorUpdate`, `MonitorResponse`, `MonitorStatus`, pagination types.
+- `app/routers/monitors.py` — **CRUD routes only** (lines through `DELETE /{monitor_id}`): POST/GET list/GET detail/PATCH/DELETE.
 
-## Do not modify
+## Boundaries
 
-- History routes (`.../checks`, `.../transitions`) in `app/routers/monitors.py`
-- `app/services/checker.py`, `app/services/scheduler.py`
-- `app/repositories/checks.py`, `app/repositories/transitions.py`
+- Do **not** own `GET .../checks` or `GET .../transitions` (@observability).
+- Do **not** implement HTTP probing or status transitions (@check-engine).
+- New monitors start with `status: UNKNOWN`; background checks are @coordinator + @check-engine.
+- Duplicate URL → raise `ConflictError`; missing id → `NotFoundError`.
 
-## Before finishing
+## Conventions
 
-Run: `uv run pytest tests/test_api_monitors.py -v`
+- Routes are thin: validate via Pydantic, call repo, map rows with `row_to_response`, raise domain exceptions.
+- No try/except except `IntegrityError` → `ConflictError` on unique `url`.
 
-## Cross-module changes
+## Verify
 
-If monitor fields affect the checker or scheduler, note the dependency — do not silently edit Check Engine or Coordinator code.
+`uv run pytest tests/test_api_monitors.py -v`
