@@ -75,6 +75,8 @@ The vault also detects **unlinked mentions**: places where a note's title appear
 
 Obsidian visualizes the vault as a knowledge graph — notes are nodes, links are edges. The graph reveals clusters of related ideas, orphan notes with no connections, and hub notes that connect many topics.
 
+NOTE: The graph view is not related to the LangGraph library. 
+
 ### Search
 
 Obsidian provides full-text search across all notes and their metadata. The search supports:

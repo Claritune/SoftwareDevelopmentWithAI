@@ -4,9 +4,13 @@ Build a CLI-based "Second Brain" personal knowledge management system in Python,
 
 ## What You're Building
 
-BrainCLI is a simplified Obsidian-like system that stores markdown notes locally, links them together with `[[wiki-style links]]`, and lets you search and query across your knowledge base. Where Obsidian stops at keyword search and simple links, BrainCLI adds AI-powered semantic search and entity extraction using a local LLM.
+BrainCLI is a simplified Obsidian-like system that stores markdown notes locally, links them together with `[[wiki-style links]]`, and lets you search and query across your knowledge base. 
 
-The full product spec is in [`docs/spec.md`](docs/spec.md).
+Obsidian is a personal knowledge management application built around plain Markdown files stored locally on your filesystem — no cloud, no proprietary format, no lock-in. You write notes, connect them with [[wiki-style links]], and over time build a personal knowledge graph that surfaces relationships between ideas you might not have noticed yourself. It became enormously popular among developers and researchers because it respects the two things they care about most: ownership of their data and extensibility through a plugin ecosystem. The name comes from obsidian, a volcanic glass formed when lava cools rapidly — a naturally occurring material that ancient civilizations used to make sharp tools and mirrors, which fits the product's identity as a tool for sharpening and reflecting on your own thinking.
+
+BrainCLI extends the Obsidian philosophy into AI territory while staying true to the same principle: everything runs on your machine. Entity extraction uses a local LLM (Llama 3.1 8B through Ollama) rather than a cloud API — your notes never leave your filesystem, there are no API keys to manage, no usage costs, and no external dependency that can go down or change its pricing. An 8B parameter model is more than capable of extracting people, organizations, and concepts from short notes, which makes it a good fit for a task where reliability and privacy matter more than frontier-level reasoning.
+
+The full product spec is in [`SPEC.md`](SPEC.md).
 
 ## Why This Exercise
 
