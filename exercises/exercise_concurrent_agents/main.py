@@ -23,7 +23,6 @@ class TaskUpdate(BaseModel):
     completed: Optional[bool] = None
 
 
-# BUG #1: next_id is never incremented — every new task overwrites id=1
 @app.post("/tasks", status_code=201)
 def create_task(task: TaskCreate):
     global next_id
@@ -36,7 +35,6 @@ def create_task(task: TaskCreate):
         "completed": False,
         "created_at": datetime.utcnow().isoformat(),
     }
-    # Missing: next_id += 1
     return tasks[task_id]
 
 
@@ -47,14 +45,9 @@ def list_tasks(completed: Optional[bool] = None, priority: Optional[int] = None)
     if completed is not None:
         result = [t for t in result if t["completed"] == completed]
 
-    # BUG #2: priority filter uses OR instead of AND — it returns tasks that
-    # match priority OR all tasks when priority is None (logic is inverted)
     if priority is not None:
         result = [t for t in result if t["priority"] != priority]
 
-    # BUG #3: sort key is wrong — sorts by "id" descending but the field is
-    # named "id", however the sort order is reversed from what the docstring
-    # says (should be newest first = highest id, but reverse=False gives oldest first)
     result = sorted(result, key=lambda t: t["id"], reverse=False)
 
     return {"tasks": result, "count": len(result)}
@@ -79,7 +72,6 @@ def update_task(task_id: int, update: TaskUpdate):
     if update.description is not None:
         task["description"] = update.description
     if update.priority is not None:
-        # BUG #4: priority validation is off-by-one — rejects valid value 3
         if update.priority < 1 or update.priority > 2:
             raise HTTPException(status_code=422, detail="Priority must be 1, 2, or 3")
         task["priority"] = update.priority
@@ -93,7 +85,6 @@ def update_task(task_id: int, update: TaskUpdate):
 def delete_task(task_id: int):
     if task_id not in tasks:
         raise HTTPException(status_code=404, detail="Task not found")
-    # BUG #5: returns the deleted task dict but forgets to actually delete it
     deleted = tasks[task_id]
     return {"deleted": deleted}
 
