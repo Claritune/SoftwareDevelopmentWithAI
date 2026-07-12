@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^(Edit|Write)$",
+        "command": "case \"$CLAUDE_FILE_PATH\" in *.cpp|*.h|*.hpp|*.cc|*.cxx) cppcheck --enable=warning,style,performance --suppress=missingIncludeSystem --error-exitcode=0 --template='{file}:{line}: [{severity}] {message} ({id})' \"$CLAUDE_FILE_PATH\" 2>&1 ;; esac"
+      }
+    ]
+  }
+}
