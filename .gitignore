@@ -4,3 +4,15 @@ __pycache__/
 *.db
 *.log
 .pytest_cache/
+
+# C++ build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+*.dSYM/
+exercises/cpp/parser_code_review/expr_eval
+exercises/cpp/parser_code_review/tests
