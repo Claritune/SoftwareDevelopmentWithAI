@@ -5,10 +5,12 @@
 
 #include "checker.hpp"
 #include "config.hpp"
+#include "stats.hpp"
 
 struct UrlState {
   Status status = Status::Unknown;
   std::string last_checked;  // ISO 8601 UTC, empty if never checked
+  UrlStats stats;
 };
 
 struct StateStore {

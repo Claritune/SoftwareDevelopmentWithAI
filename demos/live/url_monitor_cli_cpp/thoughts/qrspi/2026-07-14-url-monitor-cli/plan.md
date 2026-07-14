@@ -440,12 +440,13 @@ https://example.com   checks=120  up=118  down=2  uptime=98.3%
 ### Verification
 
 #### Automated
-- [ ] `ctest --test-dir build --output-on-failure` passes both tests
-- [ ] After ≥2 cycles, `./build/urlmon --stats --config config/example.yaml` prints per-URL blocks whose counters match observed responses
-- [ ] Counters continue accumulating across a restart (run, note totals, run again, totals grew)
+- [x] `ctest --test-dir build --output-on-failure` passes both tests
+- [x] After ≥2 cycles, `./build/urlmon --stats --config config/example.yaml` prints per-URL blocks whose counters match observed responses
+- [x] Counters continue accumulating across a restart (run, note totals, run again, totals grew)
 
 #### Manual
-- [ ] A URL that saw both 200 and 503 shows both keys with correct counts
+- [x] A URL that saw both 200 and 503 shows both keys with correct counts
+      (`HTTP  200: 2   503: 3` after a toggled local-server run + restart)
 
 ---
 

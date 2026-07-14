@@ -29,7 +29,8 @@ add_library(urlmon_core STATIC
   src/checker.cpp
   src/notifier.cpp
   src/monitor.cpp
-  src/state.cpp)
+  src/state.cpp
+  src/stats.cpp)
 target_include_directories(urlmon_core PUBLIC src)
 target_link_libraries(urlmon_core PUBLIC
   CURL::libcurl yaml-cpp::yaml-cpp nlohmann_json::nlohmann_json)
@@ -42,3 +43,7 @@ enable_testing()
 add_executable(test_classify tests/test_classify.cpp)
 target_link_libraries(test_classify PRIVATE urlmon_core)
 add_test(NAME test_classify COMMAND test_classify)
+
+add_executable(test_stats tests/test_stats.cpp)
+target_link_libraries(test_stats PRIVATE urlmon_core)
+add_test(NAME test_stats COMMAND test_stats)

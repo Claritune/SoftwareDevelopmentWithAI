@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "monitor.hpp"
 #include "state.hpp"
+#include "stats.hpp"
 
 int main(int argc, char** argv) {
   CliOptions opts = parse_args(argc, argv);
@@ -25,6 +26,18 @@ int main(int argc, char** argv) {
 
   const std::string state_path =
       opts.state_file ? *opts.state_file : derive_state_path(opts.config_path);
+
+  if (opts.stats_only) {
+    StateStore store = load_state(state_path);
+    if (store.urls.empty()) {
+      std::cout << "no statistics recorded yet (state file: " << state_path << ")\n";
+      return 0;
+    }
+    for (const auto& [url, st] : store.urls) {
+      std::cout << format_stats(url, st.stats);
+    }
+    return 0;
+  }
 
   MonitorContext ctx;
   ctx.config = std::move(*config);

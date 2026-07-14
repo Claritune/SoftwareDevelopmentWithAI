@@ -17,6 +17,42 @@ Status status_from_string(const std::string& s) {
   return Status::Unknown;
 }
 
+UrlStats stats_from_json(const json& j) {
+  UrlStats stats;
+  stats.total_checks = j.value("total_checks", 0L);
+  stats.up_checks = j.value("up_checks", 0L);
+  stats.down_checks = j.value("down_checks", 0L);
+  if (j.contains("http_status") && j["http_status"].is_object()) {
+    for (const auto& [code, count] : j["http_status"].items()) {
+      stats.http_status[std::stol(code)] = count.get<long>();
+    }
+  }
+  if (j.contains("curl_error") && j["curl_error"].is_object()) {
+    for (const auto& [name, count] : j["curl_error"].items()) {
+      stats.curl_error[name] = count.get<long>();
+    }
+  }
+  return stats;
+}
+
+json stats_to_json(const UrlStats& stats) {
+  json http_status = json::object();
+  for (const auto& [code, count] : stats.http_status) {
+    http_status[std::to_string(code)] = count;
+  }
+  json curl_error = json::object();
+  for (const auto& [name, count] : stats.curl_error) {
+    curl_error[name] = count;
+  }
+  return {
+      {"total_checks", stats.total_checks},
+      {"up_checks", stats.up_checks},
+      {"down_checks", stats.down_checks},
+      {"http_status", http_status},
+      {"curl_error", curl_error},
+  };
+}
+
 }  // namespace
 
 StateStore load_state(const std::string& path) {
@@ -41,6 +77,9 @@ StateStore load_state(const std::string& path) {
       UrlState st;
       st.status = status_from_string(entry.value("status", "unknown"));
       st.last_checked = entry.value("last_checked", "");
+      if (entry.contains("stats")) {
+        st.stats = stats_from_json(entry["stats"]);
+      }
       store.urls[url] = std::move(st);
     }
   }
@@ -53,6 +92,7 @@ bool save_state(const std::string& path, const StateStore& store) {
     urls[url] = {
         {"status", status_name(st.status)},
         {"last_checked", st.last_checked},
+        {"stats", stats_to_json(st.stats)},
     };
   }
   json root = {{"version", store.version}, {"urls", urls}};

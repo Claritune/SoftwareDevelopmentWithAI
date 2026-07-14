@@ -19,6 +19,7 @@ int run_monitor(MonitorContext& ctx, HttpClient& client) {
       }
 
       UrlState& st = ctx.state.urls[spec.url];
+      record(st.stats, result, now);
 
       // First check sets the baseline silently; only real changes notify.
       if (st.status != Status::Unknown && st.status != now) {
