@@ -13,5 +13,8 @@ struct MonitorContext {
   bool verbose = false;
 };
 
-// Runs the check loop until interrupted. Returns the process exit code.
+// Runs the check loop until SIGINT/SIGTERM. On shutdown it saves state,
+// prints a stats summary, and returns the process exit code (0).
 int run_monitor(MonitorContext& ctx, HttpClient& client);
+
+bool shutdown_requested();

@@ -1,4 +1,13 @@
+# urlmon example configuration.
+#
+# A URL is UP only when the final HTTP status (after up to 5 redirects) is 200.
+# Everything else — 3xx/4xx/5xx, timeouts, DNS/connection/SSL errors — is DOWN.
+
+# How often to run a full check cycle, in seconds. Minimum: 5.
 check_interval_seconds: 15
+
+# URLs to monitor. Each entry requires `url`; `timeout_seconds` is optional
+# (default 10, minimum 1) and bounds the whole request.
 urls:
   - url: https://httpbin.org/status/200
     timeout_seconds: 10

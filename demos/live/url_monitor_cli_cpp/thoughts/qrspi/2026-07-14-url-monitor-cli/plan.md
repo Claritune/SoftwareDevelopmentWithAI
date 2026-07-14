@@ -476,10 +476,10 @@ https://example.com   checks=120  up=118  down=2  uptime=98.3%
 ### Verification
 
 #### Automated
-- [ ] Build + full `ctest` suite pass
-- [ ] `SIGTERM` during the interval sleep: process exits 0 within ~1 s, prints stats summary, state file is current
-- [ ] `SIGINT` mid-cycle: current check completes, then clean exit 0 with summary
+- [x] Build + full `ctest` suite pass
+- [x] `SIGTERM` during the interval sleep: process exits 0 within ~1 s, prints stats summary, state file is current (measured 0.20 s)
+- [x] `SIGINT` mid-cycle: current check completes, then clean exit 0 with summary (verified against a 4.5 s `/delay/4` request)
 
 #### Manual
 - [ ] `Ctrl+C` interactively behaves the same as scripted `SIGINT`
-- [ ] README instructions reproduce a working build from a clean checkout
+- [x] README instructions reproduce a working build from a clean checkout (fresh out-of-tree configure+build+ctest in /tmp passed)
