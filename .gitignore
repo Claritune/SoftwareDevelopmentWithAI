@@ -16,3 +16,4 @@ __pycache__/
 *.dSYM/
 exercises/cpp/parser_code_review/expr_eval
 exercises/cpp/parser_code_review/tests
+exercises/cpp/parser_code_review_oop/expr_eval
