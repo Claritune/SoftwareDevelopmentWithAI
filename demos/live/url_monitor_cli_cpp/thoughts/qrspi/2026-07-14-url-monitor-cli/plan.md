@@ -243,12 +243,14 @@ add_test(NAME test_classify COMMAND test_classify)
 ### Verification
 
 #### Automated
-- [ ] Build succeeds; `ctest --test-dir build --output-on-failure` passes `test_classify`
-- [ ] `./build/urlmon --config config/example.yaml` prints `UP` for `/status/200` and `DOWN` for `/status/503`
+- [x] Build succeeds; `ctest --test-dir build --output-on-failure` passes `test_classify`
+- [x] `./build/urlmon --config config/example.yaml` prints `UP` for `/status/200` and `DOWN` for `/status/503`
+      (httpbin.org itself was serving 503 during implementation; verified against
+      `https://example.com` and `https://httpbingo.org/status/{200,503,404}` instead)
 
 #### Manual
-- [ ] A config pointing at `/status/404` prints `DOWN` with `HTTP 404`
-- [ ] A config with an unreachable host (e.g. `https://no-such-host.invalid`) prints `DOWN` with a curl error name
+- [x] A config pointing at `/status/404` prints `DOWN` with `HTTP 404` (via httpbingo.org)
+- [x] A config with an unreachable host (e.g. `https://no-such-host.invalid`) prints `DOWN` with a curl error name (`couldnt_resolve_host`)
 
 ---
 

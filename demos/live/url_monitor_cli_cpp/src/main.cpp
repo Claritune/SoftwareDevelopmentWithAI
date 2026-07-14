@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "checker.hpp"
 #include "config.hpp"
 
 int main(int argc, char** argv) {
@@ -20,9 +21,19 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::cout << "interval: " << config->check_interval_seconds << "s\n";
+  // Phase 2: one-shot check pass over all configured URLs.
+  HttpClient client;
   for (const UrlSpec& u : config->urls) {
-    std::cout << "url: " << u.url << " (timeout " << u.timeout_seconds << "s)\n";
+    CheckResult r = client.check(u);
+    Status s = classify(r);
+    std::cout << u.url << "  " << (s == Status::Up ? "UP" : "DOWN") << "  ";
+    if (r.curl_code != 0) {
+      std::cout << "(curl: " << r.curl_error_name << ")";
+    } else {
+      std::cout << "(HTTP " << r.http_status << ", " << static_cast<long>(r.total_ms)
+                << "ms)";
+    }
+    std::cout << "\n";
   }
   return 0;
 }
