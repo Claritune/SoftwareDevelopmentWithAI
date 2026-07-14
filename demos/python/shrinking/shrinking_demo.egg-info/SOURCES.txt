@@ -1,0 +1,9 @@
+process_batch.py
+pyproject.toml
+shrinking_demo.py
+shrinking_demo.egg-info/PKG-INFO
+shrinking_demo.egg-info/SOURCES.txt
+shrinking_demo.egg-info/dependency_links.txt
+shrinking_demo.egg-info/requires.txt
+shrinking_demo.egg-info/top_level.txt
+tests/test_process_batch.py
