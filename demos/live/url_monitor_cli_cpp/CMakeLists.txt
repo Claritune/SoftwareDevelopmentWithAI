@@ -26,7 +26,9 @@ FetchContent_MakeAvailable(yaml-cpp json)
 
 add_library(urlmon_core STATIC
   src/config.cpp
-  src/checker.cpp)
+  src/checker.cpp
+  src/notifier.cpp
+  src/monitor.cpp)
 target_include_directories(urlmon_core PUBLIC src)
 target_link_libraries(urlmon_core PUBLIC
   CURL::libcurl yaml-cpp::yaml-cpp nlohmann_json::nlohmann_json)

@@ -2,6 +2,7 @@
 
 #include "checker.hpp"
 #include "config.hpp"
+#include "monitor.hpp"
 
 int main(int argc, char** argv) {
   CliOptions opts = parse_args(argc, argv);
@@ -21,19 +22,9 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // Phase 2: one-shot check pass over all configured URLs.
   HttpClient client;
-  for (const UrlSpec& u : config->urls) {
-    CheckResult r = client.check(u);
-    Status s = classify(r);
-    std::cout << u.url << "  " << (s == Status::Up ? "UP" : "DOWN") << "  ";
-    if (r.curl_code != 0) {
-      std::cout << "(curl: " << r.curl_error_name << ")";
-    } else {
-      std::cout << "(HTTP " << r.http_status << ", " << static_cast<long>(r.total_ms)
-                << "ms)";
-    }
-    std::cout << "\n";
-  }
-  return 0;
+  MonitorContext ctx;
+  ctx.config = std::move(*config);
+  ctx.verbose = opts.verbose;
+  return run_monitor(ctx, client);
 }

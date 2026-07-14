@@ -307,12 +307,13 @@ int run_monitor(MonitorContext& ctx, HttpClient& client);
 ### Verification
 
 #### Automated
-- [ ] Build + `ctest` still pass
-- [ ] Two cycles against a stable `/status/200` URL produce no transition lines after baseline
-- [ ] With `--verbose`, every check logs a line
+- [x] Build + `ctest` still pass
+- [x] Two cycles against a stable `/status/200` URL produce no transition lines after baseline
+- [x] With `--verbose`, every check logs a line
 
 #### Manual
-- [ ] Swap a config entry between `/status/200` and `/status/503` across restarts of the endpoint (or edit config + restart): exactly one `DOWN` line on failure, one `UP` line on recovery
+- [x] Swap a config entry between `/status/200` and `/status/503` across restarts of the endpoint (or edit config + restart): exactly one `DOWN` line on failure, one `UP` line on recovery
+      (verified with a local toggleable HTTP server on 127.0.0.1:8642)
 
 ---
 
