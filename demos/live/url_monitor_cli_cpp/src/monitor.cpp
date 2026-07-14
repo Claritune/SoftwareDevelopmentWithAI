@@ -18,20 +18,19 @@ int run_monitor(MonitorContext& ctx, HttpClient& client) {
         log_check(spec.url, now, result);
       }
 
-      Status prev = Status::Unknown;
-      auto it = ctx.status.find(spec.url);
-      if (it != ctx.status.end()) {
-        prev = it->second;
-      }
+      UrlState& st = ctx.state.urls[spec.url];
 
       // First check sets the baseline silently; only real changes notify.
-      if (prev != Status::Unknown && prev != now) {
-        emit_transition(spec.url, prev, now, result);
+      if (st.status != Status::Unknown && st.status != now) {
+        emit_transition(spec.url, st.status, now, result);
       }
-      ctx.status[spec.url] = now;
+      st.status = now;
+      st.last_checked = iso8601_now();
     }
 
-    // Phase 3: plain sleep; replaced by an interruptible wait in Phase 6.
+    save_state(ctx.state_path, ctx.state);
+
+    // Phase 4: plain sleep; replaced by an interruptible wait in Phase 6.
     std::this_thread::sleep_for(
         std::chrono::seconds(ctx.config.check_interval_seconds));
   }

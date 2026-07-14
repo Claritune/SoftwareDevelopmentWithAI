@@ -3,6 +3,7 @@
 #include "checker.hpp"
 #include "config.hpp"
 #include "monitor.hpp"
+#include "state.hpp"
 
 int main(int argc, char** argv) {
   CliOptions opts = parse_args(argc, argv);
@@ -22,9 +23,16 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  HttpClient client;
+  const std::string state_path =
+      opts.state_file ? *opts.state_file : derive_state_path(opts.config_path);
+
   MonitorContext ctx;
   ctx.config = std::move(*config);
+  ctx.state = load_state(state_path);
+  ctx.state_path = state_path;
   ctx.verbose = opts.verbose;
+  reconcile(ctx.state, ctx.config);
+
+  HttpClient client;
   return run_monitor(ctx, client);
 }

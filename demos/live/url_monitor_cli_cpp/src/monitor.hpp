@@ -1,14 +1,15 @@
 #pragma once
 
-#include <map>
 #include <string>
 
 #include "checker.hpp"
 #include "config.hpp"
+#include "state.hpp"
 
 struct MonitorContext {
   Config config;
-  std::map<std::string, Status> status;  // last known status per URL
+  StateStore state;        // last known status per URL, persisted each cycle
+  std::string state_path;  // JSON sidecar location
   bool verbose = false;
 };
 

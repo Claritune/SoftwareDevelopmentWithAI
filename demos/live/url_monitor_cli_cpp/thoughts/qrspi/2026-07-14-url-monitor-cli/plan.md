@@ -371,13 +371,14 @@ std::string derive_state_path(const std::string& config_path); // strip ext, + "
 ### Verification
 
 #### Automated
-- [ ] Build + `ctest` pass
-- [ ] First run creates `<config>.state.json` with both URLs and valid JSON
-- [ ] Restart while a URL is `down` re-emits **no** `DOWN` line (baseline restored from file)
-- [ ] Adding a URL to config → appears as `unknown`, checked silently; removing one → dropped from the file on next save
+- [x] Build + `ctest` pass
+- [x] First run creates `<config>.state.json` with both URLs and valid JSON
+- [x] Restart while a URL is `down` re-emits **no** `DOWN` line (baseline restored from file)
+- [x] Adding a URL to config → appears as `unknown`, checked silently; removing one → dropped from the file on next save
 
 #### Manual
-- [ ] Kill the process mid-run repeatedly; state file always parses (atomic rename, never truncated)
+- [x] Kill the process mid-run repeatedly; state file always parses (atomic rename, never truncated)
+      (8 kill -9 iterations against the local toggle server; JSON parsed every time)
 
 ---
 
