@@ -1,0 +1,5 @@
+check_interval_seconds: 15
+urls:
+  - url: https://httpbin.org/status/200
+    timeout_seconds: 10
+  - url: https://httpbin.org/status/503

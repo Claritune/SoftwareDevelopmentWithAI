@@ -1,0 +1,18 @@
+---
+description: Follow QRSPI artifacts as the source of truth before implementing
+alwaysApply: false
+---
+
+# QRSPI Workflow
+
+This project uses the QRSPI workflow (Question → Research → Structure → Plan →
+Implement). Per-task artifacts live in `thoughts/qrspi/<id>/`.
+
+Before writing or changing application code:
+
+- Read the task's `design.md`, `structure.md`, and `plan.md` (when present) in
+  `thoughts/qrspi/<id>/`. Treat them as the source of truth for scope and decisions.
+- Implement in the **vertical-slice phase order** defined in `structure.md`, and
+  respect each phase's verification checkpoint before moving on.
+- If the code needs to diverge from the design, update the relevant artifact (or
+  flag it to the user) rather than silently deviating.

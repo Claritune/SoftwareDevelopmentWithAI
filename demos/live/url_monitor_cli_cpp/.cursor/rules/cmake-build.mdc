@@ -1,0 +1,29 @@
+---
+description: CMake build and dependency conventions
+globs: **/CMakeLists.txt
+alwaysApply: false
+---
+
+# CMake & Dependencies
+
+- Require **CMake 3.16+** and set the C++17 standard explicitly.
+- Single executable target: `urlmon`. Call `enable_testing()` for ctest.
+- Find libcurl with `find_package(CURL REQUIRED)` and link `CURL::libcurl`.
+- Pull `yaml-cpp` and `nlohmann/json` via `FetchContent` with **pinned version
+  tags** — never a branch or floating ref.
+
+```cmake
+# GOOD: pinned, reproducible
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG 0.8.0            # pinned tag, not master
+)
+
+# BAD: floating ref — build is not reproducible
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG master
+)
+```

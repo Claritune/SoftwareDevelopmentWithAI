@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "bash .cursor/hooks/block-rm.sh",
+        "matcher": "\\brm\\b|/bin/rm|/usr/bin/rm",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "bash .cursor/hooks/block-delete.sh",
+        "matcher": "Delete",
+        "failClosed": true
+      }
+    ]
+  }
+}

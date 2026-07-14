@@ -1,0 +1,23 @@
+---
+description: urlmon v1 scope and classification guardrails
+alwaysApply: true
+---
+
+# Project Scope Guardrails
+
+**Classification is 200-only.** A URL is **up** if and only if the final HTTP
+status is `200`. Every other outcome is **down**: 3xx, 4xx, 5xx, curl errors
+(timeout, DNS, connection, SSL), and status `0`. Redirects are followed, so a
+final `200` after redirects still counts as up.
+
+**v1 delivers:** sequential URL checks, stdout notifications on state transitions,
+JSON sidecar state, cumulative per-URL response statistics, and graceful shutdown.
+
+**Do NOT add (out of scope for v1):**
+- External notification channels (email, Slack, webhooks, push)
+- Threads, async I/O, or parallel check workers
+- Web dashboard / REST API
+- Historical/time-series metrics or SLA reporting
+- Authentication, daemonization, or config hot-reload
+
+If a task seems to require any of the above, stop and confirm with the user first.
