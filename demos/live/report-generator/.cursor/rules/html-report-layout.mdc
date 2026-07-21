@@ -1,0 +1,32 @@
+---
+description: HTML report section order and required semantic IDs from the report spec
+globs: **/*.{py,html}
+alwaysApply: false
+---
+
+# HTML Report Layout
+
+The generated HTML report must include these sections **in this order**:
+
+1. `#report-header` — title, generation timestamp, date range covered
+2. `#kpi-cards` — Total MRR, Total Customers, Churn Rate (%), Average Revenue Per Customer
+3. `#mrr-trend` — line chart, MRR by month
+4. `#revenue-by-plan` — bar or donut chart, MRR by plan tier
+5. `#churn-analysis` — monthly churn trend (line chart or table)
+6. `#top-customers` — table sorted by MRR: company, plan, MRR, signup date, activity level
+7. `#engagement-summary` — event counts by type (bar chart or table)
+
+## HTML requirements
+
+- Use `<section id="...">` for each block above
+- Output must be a single self-contained HTML file
+- KPI values must come from SQL queries, not hardcoded placeholders
+- Charts may use inline SVG or an embedded chart library; avoid requiring a separate build step
+- Top customers table must show exactly up to 10 rows, sorted by MRR descending
+
+## report_generator.py conventions
+
+- Accept `--output` CLI argument (default: `report.html`)
+- Read from `database.db` in the project root (or accept `--db-path`)
+- No LLM or external AI API calls at runtime
+- Separate data queries from HTML rendering where practical

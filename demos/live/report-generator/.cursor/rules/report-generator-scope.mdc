@@ -1,0 +1,23 @@
+---
+description: POC scope and architecture guardrails for the SaaS report generator
+alwaysApply: true
+---
+
+# Report Generator POC Scope
+
+**In scope:**
+- SQLite at `database.db` (via MCP during development)
+- Seed script/data (~10 records per entity, realistic values)
+- `report_generator.py` — standalone Python, reads DB, writes HTML
+- Self-contained HTML report with embedded CSS/charts (no external API calls at render time)
+
+**Out of scope (confirm with user first):**
+- Connecting to a real production database
+- Flask/FastAPI web server or dashboard
+- LLM calls inside `report_generator.py`
+- Heavy frameworks unless user asks (React, separate frontend build)
+
+**Architecture rule:** MCP is for development/seeding only.
+Production report path is: `database.db` → `report_generator.py` → `report.html`
+
+If a task seems to require any out-of-scope item, stop and confirm with the user first.

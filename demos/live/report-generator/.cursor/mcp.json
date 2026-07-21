@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "/Users/bigromanov/.local/bin/uvx",
+      "args": [
+        "mcp-server-sqlite",
+        "--db-path",
+        "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/demos/live/report_generator/database.db"
+      ]
+    }
+  }
+}

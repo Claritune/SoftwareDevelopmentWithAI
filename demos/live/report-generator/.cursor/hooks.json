@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeMCPExecution": [
+      {
+        "command": ".cursor/hooks/guard-sqlite-writes.sh",
+        "failClosed": true
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/block-rm-database.sh",
+        "matcher": "database\\.db",
+        "failClosed": true
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/verify-report.sh",
+        "timeout": 60,
+        "loop_limit": 3
+      }
+    ]
+  }
+}

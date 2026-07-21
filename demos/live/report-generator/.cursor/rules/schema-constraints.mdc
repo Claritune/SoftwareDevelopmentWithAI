@@ -1,0 +1,30 @@
+---
+description: SaaS schema enums and business rules for database seeding and queries
+globs: **/*.{py,sql}
+alwaysApply: false
+---
+
+# Schema Constraints
+
+## Enums (do not invent new values)
+
+- `customers.status`: `active` | `churned`
+- `customers.plan_tier`: `free` | `starter` | `professional` | `enterprise`
+- `subscriptions.status`: `active` | `cancelled` | `past_due`
+- `invoices.status`: `paid` | `pending` | `overdue` | `void`
+- `activity_events.event_type`: `login` | `feature_use` | `support_ticket` | `api_call` | `export`
+
+## Business rules
+
+- A customer has at most **one active subscription** at a time
+- MRR comes from **active subscriptions**, not invoices
+- Churn rate must be computed from customer/subscription history, not hardcoded
+- Sample data should span **multiple months** for trend charts
+- Invoice currency is always `USD` for this POC
+- Engagement: high customers 30–50 events/month; low customers 5–10 events/month
+
+## Sample data size
+
+- About **10 records per entity** (customers, subscriptions, invoices)
+- Activity events: multiple per customer, but keep total dataset small
+- Use realistic company names, emails, MRR amounts, and dates
