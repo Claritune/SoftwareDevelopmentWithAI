@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/log-tool-calls.sh"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": ".cursor/hooks/log-tool-calls.sh"
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "command": ".cursor/hooks/log-tool-calls.sh"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": ".cursor/hooks/log-prompts.sh"
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": ".cursor/hooks/log-prompts.sh"
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": ".cursor/hooks/log-prompts.sh"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": ".cursor/hooks/log-prompts.sh"
+      }
+    ],
+    "afterAgentThought": [
+      {
+        "command": ".cursor/hooks/log-prompts.sh"
+      }
+    ]
+  }
+}
