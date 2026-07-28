@@ -1,0 +1,15 @@
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/bin/Debug/net10.0/ExpressionEvaluator
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/bin/Debug/net10.0/ExpressionEvaluator.deps.json
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/bin/Debug/net10.0/ExpressionEvaluator.runtimeconfig.json
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/bin/Debug/net10.0/ExpressionEvaluator.dll
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/bin/Debug/net10.0/ExpressionEvaluator.pdb
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.GeneratedMSBuildEditorConfig.editorconfig
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.AssemblyInfoInputs.cache
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.AssemblyInfo.cs
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.csproj.CoreCompileInputs.cache
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.sourcelink.json
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.dll
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/refint/ExpressionEvaluator.dll
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.pdb
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ExpressionEvaluator.genruntimeconfig.cache
+/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/intro/ExpressionEvaluator/obj/Debug/net10.0/ref/ExpressionEvaluator.dll

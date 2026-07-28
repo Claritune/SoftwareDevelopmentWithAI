@@ -67,7 +67,7 @@ Each operation takes exactly **two arguments**. Arguments can be:
 
 ### Prerequisites
 
-- .NET SDK 8.0 or later ([download](https://dotnet.microsoft.com/download))
+- .NET SDK 10.0 or later ([download](https://dotnet.microsoft.com/download))
 - An AI coding assistant set up in your editor or terminal
 
 ### Create the Project

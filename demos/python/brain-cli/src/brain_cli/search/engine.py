@@ -70,33 +70,14 @@ class SearchEngine:
     def remove_note(self, note_id: str) -> None:
         self._collection.delete(ids=[note_id])
 
-    def keyword_search(
-        self, query: str, notes: list[Note], limit: int = 10
-    ) -> list[SearchResult]:
-        results: list[SearchResult] = []
-        q = query.lower()
-
-        for note in notes:
-            if q in note.title.lower():
-                score = 1.0
-            elif q in note.content.lower():
-                score = 0.5
-            else:
-                continue
-
-            results.append(SearchResult(
-                note_id=note.id,
-                title=note.title,
-                snippet=note.content[:200],
-                score=score,
-            ))
-
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:limit]
-
     def semantic_search(
         self, query: str, limit: int = 10
     ) -> list[SearchResult]:
+        # A non-positive limit means "no results"; ChromaDB rejects
+        # n_results <= 0 with a TypeError, so guard before querying.
+        if limit <= 0:
+            return []
+
         embedding = self._embeddings.embed_query(query)
         count = self._collection.count()
         chroma_results = self._collection.query(
@@ -113,11 +94,13 @@ class SearchEngine:
         for doc_id, distance, document, metadata in zip(
             ids, distances, documents, metadatas
         ):
+            # Cosine distance is in [0, 2] (0 = identical, 2 = opposite).
+            # Normalize to a [0, 1] relevance score: dist 0 -> 1.0, dist 2 -> 0.0.
             results.append(SearchResult(
                 note_id=doc_id,
                 title=metadata["title"],
                 snippet=document[:200],
-                score=1.0 - distance,
+                score=1.0 - (distance / 2.0),
             ))
 
         return results
