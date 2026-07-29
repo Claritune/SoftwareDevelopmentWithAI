@@ -1,0 +1,30 @@
+---
+description: C++17 coding conventions for urlmon source
+globs: src/**/*.{hpp,cpp}
+alwaysApply: false
+---
+
+# C++ Conventions
+
+- Target **C++17**. No compiler-specific extensions.
+- **RAII for every resource.** Wrap libcurl handles in a class; never let a raw
+  owning `CURL*` cross a function/module boundary.
+- **Expected failures return values, not exceptions.** Use `std::optional<T>` or a
+  lightweight `Result<T, Error>` for config load, HTTP checks, and state I/O.
+  Reserve exceptions for truly exceptional cases.
+- **No global mutable state.** Thread shared state through a `MonitorContext`
+  passed by reference.
+- **Header/impl pairs**: public interface in `.hpp`, definitions in `.cpp`.
+  Header-only is reserved for third-party libraries.
+- **Logging is a thin wrapper.** Use `log_info` / `log_error` over
+  `std::cout` / `std::cerr`. Do not add spdlog or any logging framework.
+
+```cpp
+// BAD: raw owning handle escapes, failure thrown for an expected case
+CURL* make_handle();               // caller must remember to clean up
+Config load(const std::string&);   // throws on a missing file
+
+// GOOD: RAII owner, value-based error signaling
+class HttpClient { /* owns CURL*, cleans up in dtor */ };
+std::optional<Config> load_config(const std::string& path, std::string& error);
+```

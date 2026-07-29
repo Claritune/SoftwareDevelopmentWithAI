@@ -1,0 +1,21 @@
+---
+description: Testing conventions for urlmon
+globs: tests/**/*.cpp
+alwaysApply: false
+---
+
+# Testing
+
+- Unit tests cover **pure logic only** — `classify` (200-only rule) and stats
+  accumulation/serialization. No network calls in unit tests.
+- Keep tests deterministic: construct `CheckResult` values directly instead of
+  performing real HTTP requests.
+- Register every test with ctest so `ctest --test-dir build` runs the full suite.
+- Network behavior is verified **manually** against `httpbin.org`
+  (e.g. `/status/200`, `/status/404`, `/status/503`), not in automated tests.
+
+```cpp
+// GOOD: pure, deterministic — no network
+CheckResult r; r.http_status = 503;
+assert(classify(r) == Status::Down);
+```
