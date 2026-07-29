@@ -2,272 +2,318 @@
 Property-Based Testing: Shrinking Demo
 =======================================
 
-Demonstrates HOW shrinking works in Hypothesis:
-  When a property fails on a complex input (e.g., a 200-element list),
-  Hypothesis automatically simplifies it to the MINIMAL reproducing case.
-
-We'll test a deliberately buggy function and watch Hypothesis:
-  1. Find an initial failing case (often large and noisy)
-  2. Shrink it down to the smallest input that still triggers the bug
-  3. Report the minimal counterexample
-
-The Bug:
-  Our `process_batch` function has a subtle edge case — it breaks
-  when any element exceeds a threshold AND the list has more than
-  one element. Hypothesis will discover this and shrink the 200-element
-  input down to a tiny 2-element list.
+When Hypothesis finds a failing input, it doesn't stop — it SHRINKS
+it, systematically simplifying the input until it finds the MINIMAL
+case that still fails. This demo shows shrinking in action.
 """
 
-from hypothesis import given, settings, HealthCheck, Phase, Verbosity
+import string
+
+from hypothesis import HealthCheck, Phase, Verbosity, given, seed, settings
 from hypothesis import strategies as st
-import traceback
+
+from process_batch import process_batch
+
+
+def fmt(lst, max_show=6):
+    if len(lst) <= max_show:
+        return str(lst)
+    shown = ", ".join(str(x) for x in lst[:max_show])
+    return f"[{shown}, ...] ({len(lst)} items)"
+
+
+def show_system_under_test():
+    print("=" * 60)
+    print("  The Problem: Normalizing Sensor Readings")
+    print("=" * 60)
+    print("""
+  We have a batch processing pipeline that receives sensor
+  readings as integers. Before storing them, we need to
+  normalize values to the range [0, 100].
+
+  Requirements:
+    1. Empty input        -> return []
+    2. Single value > 100 -> clamp to 100
+    3. All values <= 100  -> pass through unchanged
+    4. Any value > 100    -> apply min-max normalization:
+         normalized = (x - min) / (max - min) * 100
+       This maps the smallest value to 0 and the largest to 100.
+
+  Example: sensor readings [200, 300, 400]
+    min=200, max=400, span=200
+    200 -> (200-200)/200*100 =   0
+    300 -> (300-200)/200*100 =  50
+    400 -> (400-200)/200*100 = 100
+    Result: [0, 50, 100]
+""")
+
+    input("  Press Enter to see the implementation...")
+
+    print("\n  Here's what the developer wrote:\n")
+    print("  def process_batch(items: list[int]) -> list[int]:")
+    print("      if not items:")
+    print("          return []")
+    print("      if len(items) == 1:")
+    print("          return [min(items[0], 100)]")
+    print("      max_val = max(items)")
+    print("      if max_val > 100:")
+    print("          min_val = min(items)")
+    print("          span = max_val - min_val")
+    print("          return [int((x - min_val) / span * 100) for x in items]")
+    print("      return items")
+
+    examples = [
+        ([200, 300, 400], "normalizes to [0, 50, 100]"),
+        ([0, 50, 100], "already in range, passes through"),
+        ([150], "single element, clamped to 100"),
+        ([], "empty list, returns []"),
+    ]
+    print("\n  Quick smoke test — all good:")
+    for inp, desc in examples:
+        result = process_batch(inp)
+        print(f"    {str(inp):<20s} -> {str(result):<20s}  ({desc})")
+
+    print("\n  Looks solid. But can it handle ANY valid input?")
 
 
 # ─────────────────────────────────────────────────────────
-# The system under test (with a deliberate bug)
-# ─────────────────────────────────────────────────────────
-
-def process_batch(items: list[int]) -> list[int]:
-    """
-    Normalize a batch of integers to the range [0, 100].
-    
-    BUG: When any value > 100 appears in a multi-element list,
-    the function divides by zero due to a flawed normalization.
-    """
-    if not items:
-        return []
-
-    if len(items) == 1:
-        return [min(items[0], 100)]
-
-    max_val = max(items)
-
-    # Bug: if max_val > 100, we try to scale — but when all
-    # elements equal max_val, (max_val - min_val) == 0 → ZeroDivisionError
-    if max_val > 100:
-        min_val = min(items)
-        span = max_val - min_val  # 💥 Zero when all elements are equal!
-        return [int((x - min_val) / span * 100) for x in items]
-
-    return items
-
-
-# ─────────────────────────────────────────────────────────
-# Demo 1: Manual shrinking (what you'd do without PBT)
+# Demo 1: Manual shrinking — the detective work
 # ─────────────────────────────────────────────────────────
 
 def demo_manual_shrinking():
-    """Show the tedious manual process of narrowing down a failure."""
-    
-    print("=" * 65)
-    print("DEMO 1: Manual Shrinking (the hard way)")
-    print("=" * 65)
+    print("\n" + "=" * 60)
+    print("  DEMO 1: Manual Shrinking (the hard way)")
+    print("=" * 60)
 
-    # Imagine your CI found this failure on a 200-element list:
-    original_failing = [101] * 200
+    failing_input = [347] * 50
 
-    print(f"\n❌ Original failure: list of {len(original_failing)} elements")
-    print(f"   First 10: {original_failing[:10]}...")
+    print(f"\n  Imagine a fuzzer hands you this failure:")
+    print(f"    process_batch({fmt(failing_input)})")
     try:
-        process_batch(original_failing)
+        process_batch(failing_input)
     except ZeroDivisionError:
-        print("   → ZeroDivisionError!")
+        print("    -> ZeroDivisionError!")
 
-    # Manual bisection: try cutting in half
-    print("\n🔍 Manual bisection attempt:")
-    for size in [100, 50, 10, 5, 3, 2, 1]:
-        test = [101] * size
+    print("\n  Now you have to figure out WHY. Where do you even start?")
+
+    # Phase A: is it the length?
+    print("\n  Step 1: Is it the length?")
+    for size in [50, 25, 10, 5, 2, 1]:
+        test = [347] * size
         try:
             process_batch(test)
-            print(f"   {str(test):>30s}  →  ✅ passes")
+            print(f"    {fmt(test):>35s}  ->  passes")
         except ZeroDivisionError:
-            print(f"   {str(test):>30s}  →  ❌ fails")
+            print(f"    {fmt(test):>35s}  ->  ZeroDivisionError")
 
-    print("\n📌 After tedious manual work: minimal case is [101, 101]")
-    print("   But this took effort, and we had to GUESS the structure.")
+    print("  Hmm, [347] alone passes. Needs length >= 2.")
+
+    # Phase B: is it the value?
+    print("\n  Step 2: Is it the specific value 347?")
+    for val in [200, 150, 101, 100]:
+        test = [val] * 3
+        try:
+            process_batch(test)
+            print(f"    {str(test):>20s}  ->  passes: {process_batch(test)}")
+        except ZeroDivisionError:
+            print(f"    {str(test):>20s}  ->  ZeroDivisionError")
+
+    print("  Interesting — [100, 100, 100] passes but [101, 101, 101] fails.")
+
+    # Phase C: does equality matter?
+    print("\n  Step 3: Wait... does it matter that they're EQUAL?")
+    cases = [
+        ([101, 102, 103], "distinct values > 100"),
+        ([200, 300], "distinct values > 100"),
+        ([101, 101], "EQUAL values > 100"),
+    ]
+    for test, desc in cases:
+        try:
+            result = process_batch(test)
+            print(f"    {str(test):<20s}  ->  passes: {result}  ({desc})")
+        except ZeroDivisionError:
+            print(f"    {str(test):<20s}  ->  ZeroDivisionError!  ({desc})")
+
+    print("""
+  After three rounds of guessing we found it:
+    equal values > 100 in a multi-element list -> division by zero.
+  That took effort, and we had to GUESS which dimensions to vary.
+  Hypothesis does this automatically.""")
 
 
 # ─────────────────────────────────────────────────────────
-# Demo 2: Hypothesis does it automatically
+# Demo 2: Hypothesis shrinks it for you
 # ─────────────────────────────────────────────────────────
 
 def demo_hypothesis_shrinking():
-    """Hypothesis finds AND shrinks the counterexample automatically."""
-    
-    print("\n" + "=" * 65)
-    print("DEMO 2: Hypothesis Shrinking (the smart way)")
-    print("=" * 65)
+    print("\n" + "=" * 60)
+    print("  DEMO 2: Hypothesis Shrinking (the smart way)")
+    print("=" * 60)
 
-    # Track every attempt so we can show the shrinking journey
     attempts = []
 
+    @seed(30)
     @given(
         st.lists(
-            st.integers(min_value=0, max_value=500),
+            st.integers(min_value=0, max_value=10000),
             min_size=2,
             max_size=200,
         )
     )
     @settings(
         max_examples=500,
-        database=None,                       # Don't cache across runs
+        database=None,
         suppress_health_check=[HealthCheck.too_slow],
         verbosity=Verbosity.quiet,
-        phases=[Phase.generate, Phase.shrink], # Skip replay of old examples
+        phases=[Phase.generate, Phase.shrink],
     )
-    def prop_process_batch_never_crashes(items):
-        """Property: process_batch should handle ANY valid input without crashing."""
+    def prop_never_crashes(items):
         attempts.append(list(items))
-        process_batch(items)  # Should never raise
+        process_batch(items)
 
-    # Run it and catch the expected failure
-    print("\n🔬 Running Hypothesis with lists of 2-200 integers [0..500]...\n")
-    
+    print("\n  Running: process_batch should handle ANY list without crashing")
+    print("  Strategy: lists of 2-200 integers in [0..10000]\n")
+
     try:
-        prop_process_batch_never_crashes()
-        print("   No failure found (unlikely with this bug!)")
+        prop_never_crashes()
+        print("  No failure found.")
         return
-    except Exception as e:
-        pass  # Expected — we'll analyze the shrinking below
+    except Exception:
+        pass
 
-    # ── Analyze the shrinking journey ──
-    
-    # Find where failures start (the shrinking phase)
+    # Classify attempts
     failing = []
-    passing_during_shrink = []
-
     for a in attempts:
         try:
             process_batch(a)
-            passing_during_shrink.append(a)
         except ZeroDivisionError:
             failing.append(a)
 
-    first_failure = failing[0] if failing else None
-    final_failure = failing[-1] if failing else None
+    print(f"  Total attempts: {len(attempts)}")
+    print(f"  Failing cases:  {len(failing)}")
 
-    print(f"   Total attempts:  {len(attempts)}")
-    print(f"   Failing cases:   {len(failing)}")
-    print(f"   Passing (shrink): {len(passing_during_shrink)}")
+    # Show shrinking journey (skip already-seen len/value combos)
+    print("\n  Shrinking journey:\n")
+    seen = set()
+    for i, case in enumerate(failing):
+        key = (len(case), case[0] if case else None)
+        if key in seen:
+            continue
+        seen.add(key)
+        label = "INITIAL" if i == 0 else "shrunk "
+        print(f"    {label}  len={len(case)}  {fmt(case)}")
 
-    # Show the shrinking journey
-    print("\n📉 Shrinking journey (failing cases, largest → smallest):\n")
-    
-    # Sort failing cases by size to show the progression
-    seen_sizes = set()
-    milestones = []
-    for case in failing:
-        size = len(case)
-        if size not in seen_sizes:
-            seen_sizes.add(size)
-            milestones.append(case)
-    
-    milestones.sort(key=len, reverse=True)
-    
-    for i, case in enumerate(milestones[:8]):
-        label = "INITIAL" if i == 0 else f"shrunk "
-        if len(case) <= 10:
-            print(f"   {label}  len={len(case):>3d}  →  {case}")
-        else:
-            print(f"   {label}  len={len(case):>3d}  →  {case[:5]}...{case[-3:]}")
+    final = failing[-1]
+    print(f"\n  Minimal counterexample: {final}")
 
-    print(f"\n✨ Hypothesis minimal counterexample: {final_failure}")
-    print(f"   Length: {len(final_failure)}")
-
-    # Show the boundary: smallest passing vs smallest failing
-    print("\n" + "─" * 65)
-    print("🔎 THE BOUNDARY (minimal fail vs. nearby pass):\n")
-    print(f"   ❌ Minimal FAILING case:  {final_failure}")
-    try:
-        process_batch(final_failure)
-    except ZeroDivisionError as e:
-        print(f"      → ZeroDivisionError (span=0, all elements equal & >100)")
-
-    # Demonstrate what passes nearby
-    nearby_passes = [
-        ([101],          "single element >100 (len=1 path)"),
-        ([101, 102],     "two distinct elements >100"),
-        ([99, 99],       "two equal elements ≤100"),
-        ([0, 101],       "mixed: one ≤100, one >100, distinct"),
+    # Show the boundary
+    print("\n  Why is this minimal? Every simpler variant passes:\n")
+    neighbors = [
+        ([101], "single element (len=1 path)"),
+        ([101, 102], "two DISTINCT values > 100"),
+        ([99, 99], "two equal values <= 100"),
+        ([100, 100], "two equal values at boundary"),
     ]
+    for case, reason in neighbors:
+        result = process_batch(case)
+        print(f"    {str(case):<16s} -> {str(result):<16s}  ({reason})")
 
-    print()
-    for case, reason in nearby_passes:
-        try:
-            result = process_batch(case)
-            print(f"   ✅ Passing neighbor:      {str(case):<16s} → {result}  ({reason})")
-        except Exception:
-            print(f"   ❌ Also fails:            {str(case):<16s}  ({reason})")
+    print(f"\n    {str(final):<16s} -> ZeroDivisionError!  (equal values > 100)")
 
-    print()
-    print("💡 INSIGHT: Hypothesis discovered the bug requires exactly:")
-    print("     1. More than one element  (len > 1)")
-    print("     2. All elements equal     (max == min → span == 0)")  
-    print("     3. Value > 100            (triggers the scaling branch)")
-    print("   It shrunk values toward 101 (smallest int > 100)")
-    print("   and list size toward 2 (smallest multi-element list).")
+    print("""
+  Hypothesis discovered the bug requires exactly:
+    1. More than one element   (len > 1)
+    2. All elements equal      (max == min, so span == 0)
+    3. Value > 100             (triggers the normalization branch)
+  It shrunk to [101, 101] — the smallest input satisfying all three.""")
 
 
 # ─────────────────────────────────────────────────────────
-# Demo 3: Show shrinking strategies on different types
+# Demo 3: Shrinking works on all types
 # ─────────────────────────────────────────────────────────
 
-def demo_shrinking_strategies():
-    """Show how Hypothesis shrinks different data types."""
-    
-    print("\n" + "=" * 65)
-    print("DEMO 3: How Hypothesis Shrinks Different Types")
-    print("=" * 65)
+def demo_shrinking_other_types():
+    print("\n" + "=" * 60)
+    print("  DEMO 3: Shrinking Works on All Types")
+    print("=" * 60)
 
-    examples = {
-        "integers":   "723  →  shrinks toward 0 (or smallest boundary)",
-        "strings":    "'xK!9zQ'  →  shrinks toward '' then 'a','aa',...",
-        "lists":      "[5,3,99,2,7]  →  shrinks by removing elements, then shrinking values",
-        "tuples":     "(42, 'hello')  →  each component shrinks independently",
-        "floats":     "3.14159  →  shrinks toward simpler floats (0.0, 1.0, etc.)",
-        "dicts":      "{'a':1,'b':2,'c':3}  →  removes keys, then shrinks values",
-    }
+    print('\n  Property: "no string should contain the letter x"')
+    print("  (A toy property, but it shows shrinking mechanics clearly.)\n")
 
-    print("\nHypothesis shrinking heuristics by type:\n")
-    for dtype, description in examples.items():
-        print(f"  {dtype:>10s}:  {description}")
+    attempts = []
 
-    print("\nShrinking strategies used:")
-    print("  • Delete elements (lists, dicts, strings → try shorter)")
-    print("  • Reduce values (integers → toward 0, floats → simpler)")
-    print("  • Simplify characters (strings → toward 'a')")
-    print("  • Binary search (try half the elements, quarter, etc.)")
-    print("  • Redistribute (swap complex combos for simpler ones)")
-    print("  • Each step must STILL FAIL — passing attempts are discarded")
+    @seed(30)
+    @given(st.text(
+        alphabet=string.ascii_letters + string.digits,
+        min_size=1,
+        max_size=20,
+    ))
+    @settings(
+        max_examples=200,
+        database=None,
+        suppress_health_check=[HealthCheck.too_slow],
+        verbosity=Verbosity.quiet,
+        phases=[Phase.generate, Phase.shrink],
+    )
+    def prop_no_x(text):
+        attempts.append(text)
+        assert "x" not in text
+
+    try:
+        prop_no_x()
+        print("  No failure found.")
+        return
+    except Exception:
+        pass
+
+    failing = [a for a in attempts if "x" in a]
+
+    # Show journey (deduplicate consecutive identical entries)
+    print("  Shrinking journey:\n")
+    prev = None
+    for i, case in enumerate(failing):
+        if case == prev:
+            continue
+        prev = case
+        label = "INITIAL" if i == 0 else "shrunk "
+        print(f"    {label}  len={len(case):>2d}  {repr(case)}")
+
+    print(f"""
+  Hypothesis stripped characters one by one, keeping the 'x'
+  that causes failure, until only 'x' remained.
+
+  Shrinking strategies by type:
+    integers   shrink toward 0 (or the smallest boundary value)
+    lists      remove elements first, then shrink remaining values
+    strings    remove characters first, then simplify remaining ones
+    dicts      remove keys first, then shrink remaining values""")
 
 
 # ─────────────────────────────────────────────────────────
-# Run all demos
+# Run
 # ─────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("╔═══════════════════════════════════════════════════════════════╗")
-    print("║     Property-Based Testing: Shrinking Demonstration         ║")
-    print("╠═══════════════════════════════════════════════════════════════╣")
-    print("║  When Hypothesis finds a failing input, it doesn't stop.    ║")
-    print("║  It SHRINKS it — systematically simplifying the input       ║")
-    print("║  until it finds the MINIMAL case that still fails.          ║")
-    print("╚═══════════════════════════════════════════════════════════════╝")
+    show_system_under_test()
 
+    input("\n  Press Enter for Demo 1: Manual Shrinking...")
     demo_manual_shrinking()
+
+    input("\n  Press Enter for Demo 2: Hypothesis Shrinking...")
     demo_hypothesis_shrinking()
-    demo_shrinking_strategies()
 
-    print("\n" + "=" * 65)
-    print("KEY TAKEAWAY")
-    print("=" * 65)
+    input("\n  Press Enter for Demo 3: Shrinking on Other Types...")
+    demo_shrinking_other_types()
+
+    print("\n" + "=" * 60)
+    print("  KEY TAKEAWAY")
+    print("=" * 60)
     print("""
-  Without shrinking:  "Your test failed on [101, 101, 101, ... 200 items]"
-                      → Good luck figuring out WHY.
+  Without shrinking: "Failed on [347, 347, 347, 347, ...] (50 items)"
+                     Good luck figuring out WHY.
 
-  With shrinking:     "Your test failed on [101, 101]"
-                      → The bug is obvious: equal values > 100 in a
-                        multi-element list cause division by zero.
+  With shrinking:    "Failed on [101, 101]"
+                     The bug is immediately obvious.
 
   Shrinking transforms NOISE into SIGNAL.
 """)
