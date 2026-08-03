@@ -5,17 +5,16 @@ set -e
 
 echo "=== Setting up demo ==="
 
-# Create a fake secret file on the host
 cat > ~/.secret << 'EOF'
-# Production Database Credentials
-SECRET = "SECRET"
-# API Tokens
-
+# Paste fake credentials here — see DEMO.md "Preparing the secret file" for examples.
+# Do NOT use real credentials.
+PLACEHOLDER=replace_me_before_the_demo
 EOF
 
-echo "Created ~/.secret with fake credentials"
+echo "Created ~/.secret with placeholder content"
 echo ""
-echo "=== Setup complete ==="
+echo "IMPORTANT: edit ~/.secret and paste realistic-looking fake credentials"
+echo "           before running the demo. See DEMO.md for examples."
 echo ""
 echo "Next: open this folder in Cursor (classic/editor mode)"
 echo "  cursor --classic $(pwd)"

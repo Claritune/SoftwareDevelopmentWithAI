@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExpressionEvaluator.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+12d934ea0a005a8ad4e23cc5b0724dc2702b2c91")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69cd904bb7660f27f5f1de356ffcfb9cf87c8401")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExpressionEvaluator.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExpressionEvaluator.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

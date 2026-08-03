@@ -25,7 +25,28 @@ From your **host machine** (not inside a container):
 ./setup-demo.sh
 ```
 
-This creates `~/.secret` on your Mac with **fake** credentials used only for the demo.
+This creates `~/.secret` with placeholder content. You must edit it before the demo.
+
+### Preparing the secret file
+
+Open `~/.secret` and replace the placeholder with realistic-looking **fake** credentials. For example:
+
+```
+# Production Database Credentials
+DB_HOST=prod-db.company.internal
+DB_USER=admin
+DB_PASSWORD=SuperSecret123!
+
+# AWS Access Keys
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+# API Tokens
+GITHUB_TOKEN=ghp_FAKE_TOKEN_REPLACE_ME_1234567890
+STRIPE_KEY=FAKE_STRIPE_KEY_REPLACE_ME_1234567890
+```
+
+**Do NOT use real credentials.** The values above are obviously fake (AWS's published example keys, placeholder token strings). Invent your own if you prefer — the point is that they look alarming on screen when the agent reads them out.
 
 ## Opening the project in Cursor
 
