@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "mem0": {
+      "command": "/Users/bigromanov/.local/bin/uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/elvismdev/mem0-mcp-selfhosted.git@v0.3.2",
+        "--with",
+        "mcp[cli]>=1.23.0,<2",
+        "mem0-mcp-selfhosted"
+      ],
+      "env": {
+        "MEM0_PROVIDER": "ollama",
+        "MEM0_LLM_MODEL": "llama3.1:8b",
+        "MEM0_USER_ID": "demo-user"
+      }
+    }
+  }
+}

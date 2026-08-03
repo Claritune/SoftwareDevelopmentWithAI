@@ -1,0 +1,29 @@
+{
+    "name": "Secure Agent Sandbox",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+
+    "remoteUser": "sandbox",
+
+    "mounts": [],
+
+    "runArgs": [
+      "--cap-drop=ALL",
+      "--security-opt=no-new-privileges:true"
+    ],
+
+    "containerEnv": {
+      "SANDBOX": "true"
+    },
+
+    "customizations": {
+      "cursor": {
+        "extensions": [
+          "ms-python.python"
+        ]
+      }
+    },
+
+    "postCreateCommand": "echo '=== Sandboxed environment ready. Host filesystem is NOT accessible. ==='"
+  }
