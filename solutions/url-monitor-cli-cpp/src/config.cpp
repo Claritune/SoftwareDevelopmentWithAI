@@ -2,6 +2,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <set>
 #include <sstream>
 
 std::optional<Config> load_config(const std::string& path, std::string& error) {
@@ -66,6 +67,14 @@ std::optional<Config> load_config(const std::string& path, std::string& error) {
     }
 
     config.urls.push_back(std::move(spec));
+  }
+
+  std::set<std::string> seen;
+  for (const auto& spec : config.urls) {
+    if (!seen.insert(spec.url).second) {
+      error = "duplicate url: " + spec.url;
+      return std::nullopt;
+    }
   }
 
   return config;

@@ -1,0 +1,13 @@
+---
+description: File operation safety policy
+alwaysApply: true
+---
+
+# File Safety
+
+Project hooks block `rm` and the Delete tool (`.cursor/hooks.json`).
+
+- **Never** run `rm` or attempt file deletion via tools — the call will be denied.
+- Prefer **editing** files over deleting and recreating them.
+- If a file genuinely must be removed, tell the user the exact path(s) and ask
+  them to delete it manually in their terminal or Finder. Do not retry deletion.

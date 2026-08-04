@@ -1,0 +1,2 @@
+[console_scripts]
+url-monitor = url_monitor.__main__:main

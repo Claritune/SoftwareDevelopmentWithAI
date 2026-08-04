@@ -1,0 +1,9 @@
+check_interval_seconds: 30
+
+urls:
+  - url: https://example.com
+    timeout_seconds: 10
+  - url: https://httpbin.org/status/200
+    timeout_seconds: 5
+  - url: https://httpbin.org/status/503
+    timeout_seconds: 5

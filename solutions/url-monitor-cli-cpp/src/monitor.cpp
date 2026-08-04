@@ -61,7 +61,9 @@ int run_monitor(MonitorContext& ctx, HttpClient& client) {
       st.last_checked = iso8601_now();
     }
 
-    save_state(ctx.state_path, ctx.state);
+    if (!save_state(ctx.state_path, ctx.state)) {
+      log_error("failed to persist state to " + ctx.state_path);
+    }
 
     if (interruptible_wait(ctx.config.check_interval_seconds)) {
       break;
@@ -69,7 +71,9 @@ int run_monitor(MonitorContext& ctx, HttpClient& client) {
   }
 
   log_info("shutting down");
-  save_state(ctx.state_path, ctx.state);
+  if (!save_state(ctx.state_path, ctx.state)) {
+    log_error("failed to persist final state to " + ctx.state_path);
+  }
   for (const auto& [url, st] : ctx.state.urls) {
     std::cout << format_stats(url, st.stats);
   }

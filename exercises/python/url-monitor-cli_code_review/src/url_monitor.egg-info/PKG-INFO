@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: url-monitor
+Version: 1.0.0
+Summary: CLI tool that monitors URLs for uptime and logs state transitions
+Requires-Python: >=3.11
+Requires-Dist: httpx
+Requires-Dist: pyyaml
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"

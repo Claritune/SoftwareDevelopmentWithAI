@@ -68,6 +68,11 @@ HttpClient::~HttpClient() {
 
 CheckResult HttpClient::check(const UrlSpec& spec) {
   CheckResult result;
+  if (handle_ == nullptr) {
+    result.curl_code = CURLE_FAILED_INIT;
+    result.curl_error_name = "init_failed";
+    return result;
+  }
   CURL* curl = static_cast<CURL*>(handle_);
 
   curl_easy_reset(curl);

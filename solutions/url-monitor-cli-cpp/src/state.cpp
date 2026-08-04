@@ -19,18 +19,23 @@ Status status_from_string(const std::string& s) {
 
 UrlStats stats_from_json(const json& j) {
   UrlStats stats;
-  stats.total_checks = j.value("total_checks", 0L);
-  stats.up_checks = j.value("up_checks", 0L);
-  stats.down_checks = j.value("down_checks", 0L);
-  if (j.contains("http_status") && j["http_status"].is_object()) {
-    for (const auto& [code, count] : j["http_status"].items()) {
-      stats.http_status[std::stol(code)] = count.get<long>();
+  try {
+    stats.total_checks = j.value("total_checks", 0L);
+    stats.up_checks = j.value("up_checks", 0L);
+    stats.down_checks = j.value("down_checks", 0L);
+    if (j.contains("http_status") && j["http_status"].is_object()) {
+      for (const auto& [code, count] : j["http_status"].items()) {
+        stats.http_status[std::stol(code)] = count.get<long>();
+      }
     }
-  }
-  if (j.contains("curl_error") && j["curl_error"].is_object()) {
-    for (const auto& [name, count] : j["curl_error"].items()) {
-      stats.curl_error[name] = count.get<long>();
+    if (j.contains("curl_error") && j["curl_error"].is_object()) {
+      for (const auto& [name, count] : j["curl_error"].items()) {
+        stats.curl_error[name] = count.get<long>();
+      }
     }
+  } catch (const std::exception& e) {
+    log_error(std::string("malformed stats entry, using defaults: ") + e.what());
+    return UrlStats{};
   }
   return stats;
 }

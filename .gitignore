@@ -5,6 +5,7 @@ __pycache__/
 *.db
 *.log
 .pytest_cache/
+.mutants/
 .claude/settings.local.json
 
 # C++ build artifacts

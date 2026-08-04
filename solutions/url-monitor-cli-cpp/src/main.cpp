@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
 
   if (opts.stats_only) {
     StateStore store = load_state(state_path);
+    reconcile(store, *config);
     if (store.urls.empty()) {
       std::cout << "no statistics recorded yet (state file: " << state_path << ")\n";
       return 0;
