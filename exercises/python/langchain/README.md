@@ -14,7 +14,7 @@ Raw Text → Prompt Template → LLM (Ollama) → Output Parser → Pydantic Mod
 
 ```bash
 pip install langchain langchain-ollama pydantic
-ollama pull llama3.1
+ollama pull llama3.1:8b
 ```
 
 ## What's Implemented
@@ -73,7 +73,7 @@ When parsing fails, feed the LLM's raw output and the validation error message b
 
 ### Challenge 4 — Model Comparison
 
-Run the same pipeline across different Ollama models (llama3.1, mistral, gemma2). Compare extraction quality: which models follow format instructions best? Which hallucinate field values? Build a simple scoring function that checks each field against expected values.
+Run the same pipeline across different Ollama models (llama3.1:8b, mistral, gemma2). Compare extraction quality: which models follow format instructions best? Which hallucinate field values? Build a simple scoring function that checks each field against expected values.
 
 ### Challenge 5 — Real-World Input
 

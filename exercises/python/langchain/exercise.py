@@ -8,7 +8,7 @@ using LangChain prompt templates, output parsers, and Pydantic models.
 Prerequisites:
   - pip install langchain langchain-ollama pydantic
   - Ollama running locally with a model pulled:
-      ollama pull llama3.1
+    ollama pull llama3.1:8b
 
 Architecture:
   Raw Text → Prompt Template → LLM (Ollama) → Output Parser → Pydantic Model
@@ -113,7 +113,7 @@ SAMPLE_TEXTS = [
 # Step 3: Build the extraction chain
 # ---------------------------------------------------------------------------
 
-def build_extraction_chain(model_name: str = "llama3.1"):
+def build_extraction_chain(model_name: str = "llama3.1:8b"):
     """
     Construct a LangChain chain that extracts CompanyInfo from raw text.
 
@@ -232,7 +232,7 @@ def main():
 #    the LLM and ask it to fix its output. This is a common agentic pattern.
 #
 # 4. Compare extraction quality across different Ollama models
-#    (llama3.1 vs mistral vs gemma2). Which handles the format instructions best?
+#    (llama3.1:8b vs mistral vs gemma2). Which handles the format instructions best?
 #
 # 5. Try with a real-world text: copy a company's "About" page or a LinkedIn
 #    job posting and see how well the pipeline handles truly messy input.
