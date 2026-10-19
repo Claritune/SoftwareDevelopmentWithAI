@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Pipeline Demo</title>
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --surface-2: #f3f1ec;
+    --text: #1d1c1a;
+    --muted: #64615b;
+    --border: #e2ded6;
+    --accent: #c2410c;
+    --accent-soft: #fdebdf;
+    --c1: #2563eb; --c1-soft: #dbe7fd;
+    --c2: #0f8a5f; --c2-soft: #d5f2e6;
+    --c3: #9333ea; --c3-soft: #efe0fc;
+    --c4: #c2410c; --c4-soft: #fdebdf;
+    --code-bg: #f3f1ec;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151413; --surface: #1d1c1a; --surface-2: #262522;
+      --text: #ece9e3; --muted: #a29e96; --border: #353330;
+      --accent: #fb8a4c; --accent-soft: #3a2418;
+      --c1: #7aa7ff; --c1-soft: #1c2a47;
+      --c2: #4fd1a1; --c2-soft: #143327;
+      --c3: #c79bff; --c3-soft: #2e1f42;
+      --c4: #fb8a4c; --c4-soft: #3a2418;
+      --code-bg: #262522;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151413; --surface: #1d1c1a; --surface-2: #262522;
+    --text: #ece9e3; --muted: #a29e96; --border: #353330;
+    --accent: #fb8a4c; --accent-soft: #3a2418;
+    --c1: #7aa7ff; --c1-soft: #1c2a47;
+    --c2: #4fd1a1; --c2-soft: #143327;
+    --c3: #c79bff; --c3-soft: #2e1f42;
+    --c4: #fb8a4c; --c4-soft: #3a2418;
+    --code-bg: #262522;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 48px 16px 80px; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 0 0 12px; letter-spacing: -.02em; }
+  h2 { font-size: 24px; margin: 0 0 8px; letter-spacing: -.01em; }
+  h3 { font-size: 16px; margin: 20px 0 6px; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 640px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; }
+  :not(pre) > code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  main { overflow-wrap: break-word; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+  a { color: var(--accent); }
+
+  section { margin-top: 56px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+
+  /* Overview pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 28px 0 8px; }
+  .pipe-step { text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 10px; text-align: center; position: relative; box-shadow: var(--shadow); }
+  .pipe-step:hover { border-color: var(--accent); }
+  .pipe-step .n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; }
+  .pipe-step .t { display: block; font-weight: 600; margin-top: 6px; }
+  .pipe-step .s { display: block; font-size: 12px; color: var(--muted); }
+  .pipe-step:not(:last-child)::after { content: "→"; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; z-index: 1; }
+  @media (max-width: 640px) {
+    .pipeline { grid-template-columns: 1fr; }
+    .pipe-step { display: flex; align-items: center; gap: 12px; text-align: left; }
+    .pipe-step .t { margin-top: 0; }
+    .pipe-step:not(:last-child)::after { content: "↓"; right: auto; left: 22px; top: auto; bottom: -15px; transform: none; }
+  }
+
+  .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .phase { border-radius: 10px; padding: 14px 16px; border: 1px solid var(--border); background: var(--surface); }
+  .phase b { display: block; margin-bottom: 2px; }
+  .phase.index { border-left: 4px solid var(--c1); }
+  .phase.query { border-left: 4px solid var(--c2); }
+  @media (max-width: 640px) { .phases { grid-template-columns: 1fr; } }
+
+  /* Step sections */
+  .step-head { display: flex; align-items: baseline; gap: 12px; }
+  .step-num { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 16px 0; }
+  .stat { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+  .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: 12px; color: var(--muted); }
+  .figure { margin: 16px 0; }
+  .figure figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  /* Chunk overlap */
+  .chunks { font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.9; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-wrap: anywhere; }
+  .ch { border-radius: 3px; padding: 1px 0; }
+  .ch.a { background: var(--c1-soft); }
+  .ch.ov { background: linear-gradient(var(--c1-soft), var(--c1-soft)) top / 100% 50% no-repeat, linear-gradient(var(--c3-soft), var(--c3-soft)) bottom / 100% 50% no-repeat; outline: 1.5px dashed var(--c3); }
+  .ch.b { background: var(--c3-soft); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+  /* Embedding bars */
+  .vec { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .vec-row .label { font-size: 13px; margin-bottom: 4px; }
+  .bars { display: flex; align-items: center; gap: 2px; height: 48px; background: var(--surface-2); border-radius: 6px; padding: 4px; position: relative; }
+  .bars span { flex: 1; border-radius: 1px; }
+  .bars::before { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; border-top: 1px dashed var(--border); }
+
+  /* Similarity diagram */
+  svg text { font-family: inherit; }
+  .sim svg { width: 100%; height: auto; display: block; }
+
+  /* Retrieved chunks */
+  .hits { display: grid; gap: 8px; }
+  .hit { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .hit .r { font-weight: 700; color: var(--c2); font-variant-numeric: tabular-nums; }
+  .hit q { font-style: italic; color: var(--muted); }
+
+  /* Prompt assembly */
+  .prompt { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  .prompt > div { padding: 10px 14px; border-top: 1px solid var(--border); }
+  .prompt > div:first-child { border-top: none; }
+  .prompt .tag { display: inline-block; font-family: -apple-system, system-ui, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 1px 7px; border-radius: 99px; margin-bottom: 4px; }
+  .p-inst { background: var(--surface-2); }
+  .p-inst .tag { background: var(--border); color: var(--text); }
+  .p-ctx { background: var(--c2-soft); }
+  .p-ctx .tag { background: var(--c2); color: var(--bg); }
+  .p-q { background: var(--c1-soft); }
+  .p-q .tag { background: var(--c1); color: var(--bg); }
+  .answer { margin-top: 14px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; padding: 12px 16px; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface-2); }
+  tr:last-child td { border-bottom: none; }
+  td:first-child code { white-space: nowrap; overflow-wrap: normal; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .two > * { min-width: 0; }
+  @media (max-width: 640px) { .two { grid-template-columns: 1fr; } }
+
+  .callout { border: 1px solid var(--border); background: var(--surface-2); border-radius: 10px; padding: 12px 16px; font-size: 14px; margin-top: 14px; }
+  .callout b { color: var(--accent); }
+
+  .theme-toggle { position: fixed; top: 12px; right: 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 99px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  footer { margin-top: 64px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle color theme">◐ Theme</button>
+<main>
+
+  <header>
+    <div class="eyebrow">demos/live/rag_pipeline · demo.py</div>
+    <h1>How the RAG demo works</h1>
+    <p class="lede">A fully local Retrieval-Augmented Generation pipeline over <em>Alice’s Adventures in Wonderland</em>.
+      Nothing leaves the laptop. Ollama runs the models and ChromaDB stores the vectors, both on your machine.</p>
+
+    <nav class="pipeline" aria-label="Pipeline steps">
+      <a class="pipe-step" href="#step1"><span class="n">1</span><span><span class="t">Load</span><span class="s">read the book</span></span></a>
+      <a class="pipe-step" href="#step2"><span class="n">2</span><span><span class="t">Chunk</span><span class="s">split into pieces</span></span></a>
+      <a class="pipe-step" href="#step3"><span class="n">3</span><span><span class="t">Embed</span><span class="s">text → vectors</span></span></a>
+      <a class="pipe-step" href="#step4"><span class="n">4</span><span><span class="t">Store</span><span class="s">save in ChromaDB</span></span></a>
+      <a class="pipe-step" href="#step5"><span class="n">5</span><span><span class="t">Retrieve &amp; answer</span><span class="s">search + LLM</span></span></a>
+    </nav>
+
+    <div class="phases">
+      <div class="phase index"><b>Indexing (steps 1–4)</b><span class="muted small">Done once per book. Turns raw text into a searchable store of meaning-vectors.</span></div>
+      <div class="phase query"><b>Querying (step 5)</b><span class="muted small">Done per question. Finds the most relevant passages and has the LLM answer <em>only</em> from them.</span></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Why RAG?</h2>
+    <p>An LLM only knows what was in its training data, and it can confidently make things up. RAG fixes that by
+      <b>looking up</b> relevant passages from <em>your</em> documents first, then handing them to the model as context.
+      Answers become grounded in a specific source you can cite and check.</p>
+    <div class="two">
+      <div class="card"><b>Without RAG</b><p class="muted small" style="margin:6px 0 0">“What did the Hatter say about time?” → the model answers from fuzzy memory of the book, with no sources and possibly invented quotes.</p></div>
+      <div class="card"><b>With RAG</b><p class="muted small" style="margin:6px 0 0">The same question → the 4 most relevant tea-party passages are retrieved → the model answers from those passages and cites <code>books/alice.txt</code>.</p></div>
+    </div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section id="step1">
+    <div class="step-head"><span class="step-num">1</span><h2>Load the source text</h2></div>
+    <p>The demo reads <code>books/alice.txt</code>, the Project Gutenberg plain-text edition, into a single Python string.
+      No parsing is needed. The demo prints the size and the opening lines so the audience can see the raw input.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">144,431</div><div class="l">characters</div></div>
+      <div class="stat"><div class="v">26,449</div><div class="l">words</div></div>
+      <div class="stat"><div class="v">3,339</div><div class="l">lines</div></div>
+    </div>
+    <pre>text = BOOK_PATH.read_text(encoding="utf-8", errors="ignore")</pre>
+  </section>
+
+  <!-- STEP 2 -->
+  <section id="step2">
+    <div class="step-head"><span class="step-num">2</span><h2>Split into chunks</h2></div>
+    <p>A whole book is far too big to embed as one vector, or to paste into a prompt. So it is cut into small, overlapping
+      chunks. Each chunk becomes one unit of search.
+      <code>RecursiveCharacterTextSplitter</code> prefers to split at paragraph breaks, then lines, then spaces. That keeps sentences intact where it can.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">500</div><div class="l">max chars per chunk</div></div>
+      <div class="stat"><div class="v">80</div><div class="l">chars of overlap</div></div>
+      <div class="stat"><div class="v">402</div><div class="l">chunks produced</div></div>
+      <div class="stat"><div class="v">376</div><div class="l">avg chars / chunk</div></div>
+    </div>
+    <figure class="figure">
+      <div class="chunks"><span class="ch a">…'Have you guessed the riddle yet?' the Hatter said, turning to Alice again. 'No, I give it up,' Alice replied: 'what's the answer?' 'I haven't the slightest idea,' said the Hatter. </span><span class="ch ov">'Nor I,' said the March Hare. Alice sighed wearily. </span><span class="ch b">'I think you might do something better with the time,' she said, 'than waste it in asking riddles that have no answers.' 'If you knew Time as well as I do,' said the Hatter…</span></div>
+      <div class="legend">
+        <span><i style="background:var(--c1-soft)"></i>chunk N</span>
+        <span><i style="background:var(--c3-soft)"></i>chunk N+1</span>
+        <span><i style="outline:1.5px dashed var(--c3);background:var(--surface)"></i>overlap: appears in both</span>
+      </div>
+      <figcaption>The overlap means a sentence that falls on a boundary still appears whole in at least one chunk, so its meaning isn’t lost at the cut. (Illustration: real chunk boundaries vary.)</figcaption>
+    </figure>
+    <div class="callout"><b>Trade-off.</b> Smaller chunks give more precise retrieval but less context per hit. Bigger chunks are the reverse.
+      <code>demo.py</code> uses 500/80 to show many small, focused passages. <code>rag_pipeline.py</code> uses 1000/200 for whole libraries.</div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section id="step3">
+    <div class="step-head"><span class="step-num">3</span><h2>Generate embeddings</h2></div>
+    <p>Each chunk is sent to the <code>nomic-embed-text</code> model running in Ollama, which returns a list of
+      <b>768 numbers</b>, its <em>embedding</em>. Think of it as a coordinate in a 768-dimensional “meaning space”.
+      Texts about similar things land close together, even if they share no words.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">768</div><div class="l">dimensions per vector</div></div>
+      <div class="stat"><div class="v">402</div><div class="l">HTTP calls to Ollama</div></div>
+      <div class="stat"><div class="v">~15 s</div><div class="l">on Apple Silicon</div></div>
+    </div>
+    <figure class="figure card">
+      <div class="vec" id="vecViz"></div>
+      <figcaption>Each bar is one of the first 48 of 768 values (illustrative). Chunks with similar meaning have similar patterns. A chunk on a different topic looks different.</figcaption>
+    </figure>
+    <pre>r = httpx.post(f"{OLLAMA_URL}/api/embeddings",
+               json={"model": "nomic-embed-text", "prompt": chunk_text})
+vector = r.json()["embedding"]          # → [0.0123, -0.4410, 0.2871, …]  (768 floats)</pre>
+    <div class="callout"><b>Why one-at-a-time?</b> The custom <code>OllamaEmbeddings</code> class embeds chunks one request at a time.
+      Batch requests can fail with encoder-only models like <code>nomic-embed-text</code> in Ollama, and the per-chunk progress counter looks good on stage anyway.</div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section id="step4">
+    <div class="step-head"><span class="step-num">4</span><h2>Store in ChromaDB</h2></div>
+    <p>The chunks and the vectors from step 3 are written together into a ChromaDB collection on disk at
+      <code>./chroma_db_alice</code>. ChromaDB runs <em>embedded</em>, inside the Python process, so there is no server to start.
+      It builds an <b>HNSW index</b> over the vectors, a graph that finds nearest neighbours quickly without comparing against every vector.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>id</th><th>embedding</th><th>document</th><th>metadata</th></tr></thead>
+        <tbody>
+          <tr><td><code>3f9c…</code></td><td><code>[0.012, -0.441, …]</code></td><td class="muted">ALICE'S ADVENTURES IN WONDERLAND · Lewis Carroll…</td><td><code>source: books/alice.txt</code></td></tr>
+          <tr><td><code>a71e…</code></td><td><code>[0.284, 0.093, …]</code></td><td class="muted">Alice was beginning to get very tired of sitting by her sister…</td><td><code>source: books/alice.txt</code></td></tr>
+          <tr><td colspan="4" class="muted small">… 402 rows total</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre># vectors from step 3 are reused, so nothing is embedded twice
+collection.add(ids=…, embeddings=vectors, documents=texts, metadatas=…)</pre>
+    <div class="callout"><b>Fresh every run.</b> <code>demo.py</code> deletes and rebuilds the collection each time, so rehearsals always start clean.
+      The folder is gitignored.</div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section id="step5">
+    <div class="step-head"><span class="step-num">5</span><h2>Semantic search + LLM answer</h2></div>
+    <h3>5a · Retrieve</h3>
+    <p>The question is embedded with the <em>same</em> model, placing it in the same meaning space as the chunks.
+      ChromaDB then returns the <b>k = 4</b> chunks whose vectors are closest to the question’s vector.</p>
+
+    <figure class="figure card sim">
+      <svg viewBox="0 0 640 300" role="img" aria-label="2D projection of the vector space: the question vector sits among tea-party chunks; unrelated chunks are farther away">
+        <defs>
+          <radialGradient id="halo"><stop offset="0%" stop-color="var(--c2)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--c2)" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="0" y="0" width="640" height="300" fill="none"/>
+        <!-- unrelated chunks -->
+        <g fill="var(--muted)" opacity=".45">
+          <circle cx="60" cy="50" r="5"/><circle cx="95" cy="80" r="5"/><circle cx="70" cy="120" r="5"/><circle cx="120" cy="45" r="5"/>
+          <circle cx="560" cy="60" r="5"/><circle cx="590" cy="100" r="5"/><circle cx="530" cy="95" r="5"/>
+          <circle cx="80" cy="240" r="5"/><circle cx="130" cy="260" r="5"/><circle cx="110" cy="215" r="5"/>
+          <circle cx="560" cy="240" r="5"/><circle cx="600" cy="210" r="5"/><circle cx="520" cy="265" r="5"/>
+          <circle cx="250" cy="40" r="5"/><circle cx="420" cy="270" r="5"/><circle cx="210" cy="275" r="5"/>
+        </g>
+        <g font-size="12" fill="var(--muted)">
+          <text x="60" y="30">croquet</text>
+          <text x="520" y="40">Mock Turtle</text>
+          <text x="70" y="290">rabbit hole</text>
+          <text x="520" y="290">trial</text>
+        </g>
+        <circle cx="330" cy="150" r="110" fill="url(#halo)"/>
+        <circle cx="330" cy="150" r="96" fill="none" stroke="var(--c2)" stroke-dasharray="4 4" opacity=".7"/>
+        <!-- lines to neighbours -->
+        <g stroke="var(--c2)" stroke-width="1.5" opacity=".8">
+          <line x1="330" y1="150" x2="290" y2="105"/><line x1="330" y1="150" x2="385" y2="118"/>
+          <line x1="330" y1="150" x2="372" y2="205"/><line x1="330" y1="150" x2="268" y2="185"/>
+        </g>
+        <!-- retrieved chunks -->
+        <g fill="var(--c2)">
+          <circle cx="290" cy="105" r="7"/><circle cx="385" cy="118" r="7"/><circle cx="372" cy="205" r="7"/><circle cx="268" cy="185" r="7"/>
+        </g>
+        <g font-size="12" font-weight="700" fill="var(--c2)">
+          <text x="270" y="96">1</text><text x="394" y="114">2</text><text x="381" y="219">3</text><text x="250" y="198">4</text>
+        </g>
+        <!-- other tea party chunk just outside -->
+        <circle cx="450" cy="170" r="5" fill="var(--muted)" opacity=".45"/>
+        <!-- query -->
+        <g>
+          <rect x="318" y="138" width="24" height="24" rx="5" fill="var(--c1)" transform="rotate(45 330 150)"/>
+          <text x="330" y="268" text-anchor="middle" font-size="12" fill="var(--c1)" font-weight="600" dy="0">◆ question vector</text>
+        </g>
+        <text x="430" y="152" font-size="12" fill="var(--c2)">top-4 nearest</text>
+      </svg>
+      <figcaption>A 2-D sketch of the 768-D space. The question lands among the tea-party chunks. The k nearest are retrieved, and passages about croquet or the trial are ignored.</figcaption>
+    </figure>
+
+    <p class="small muted">Real retrieval from a demo run for <b>“What did the Mad Hatter say about time at the tea party?”</b>:</p>
+    <div class="hits">
+      <div class="hit"><span class="r">#1</span><q>'Well, I'd hardly finished the first verse,' said the Hatter, 'when the Queen jumped up and bawled out, "He's murdering the time! Off with his head!"'…</q></div>
+      <div class="hit"><span class="r">#2</span><q>'Of course you don't!' the Hatter said, tossing his head contemptuously. 'I dare say you never even spoke to Time!'…</q></div>
+      <div class="hit"><span class="r">#3</span><q>The Hatter shook his head mournfully. 'Not I!' he replied. 'We quarrelled last March—just before HE went mad, you know—'…</q></div>
+      <div class="hit"><span class="r">#4</span><q>'Yes, that's it,' said the Hatter with a sigh: 'it's always tea-time, and we've no time to wash the things between whiles.'…</q></div>
+    </div>
+    <p class="small muted" style="margin-top:10px">The book never uses the phrase “Mad Hatter”. He is always just “the Hatter”. These passages were found by <em>meaning</em>, not keyword matching.</p>
+
+    <h3>5b · Generate</h3>
+    <p>The four chunks are pasted into a prompt template along with the question, and sent to <code>llama3.1:8b</code>
+      with <code>temperature=0</code> for repeatable output. The instruction tells it to answer <em>only</em> from the context.</p>
+    <div class="prompt">
+      <div class="p-inst"><span class="tag">instruction</span><br>Use ONLY the context below to answer the question.</div>
+      <div class="p-ctx"><span class="tag">context · 4 retrieved chunks</span><br>'Well, I'd hardly finished the first verse,' said the Hatter…<br>'I dare say you never even spoke to Time!'…<br>…</div>
+      <div class="p-q"><span class="tag">question</span><br>What did the Mad Hatter say about time at the tea party?</div>
+    </div>
+    <div class="answer">
+      <div class="eyebrow" style="margin-bottom:4px">llama3.1:8b answer</div>
+      The Mad Hatter said that “He’s murdering the time!” when referring to Time (the person) and also mentioned that it was
+      always six o’clock now, implying that time had become distorted or stuck. He also mentioned that he and Time quarrelled
+      before Time went mad.
+      <div class="small muted" style="margin-top:6px">Sources: books/alice.txt</div>
+    </div>
+    <pre>chain = (
+    RunnableParallel(context=retriever, question=RunnablePassthrough())   # 5a: fetch top-k
+    | RunnablePassthrough.assign(result=prompt | llm | StrOutputParser()) # 5b: answer
+)
+response = chain.invoke(query)   # → {"context": [Document…], "question": …, "result": "…"}</pre>
+    <p class="small muted">The chain keeps the retrieved <code>context</code> documents in its output. That’s how the demo prints the sources next to the answer.</p>
+  </section>
+
+  <section>
+    <h2>Two ways to run it</h2>
+    <div class="two">
+      <div class="card">
+        <b>Guided walkthrough</b>
+        <p class="muted small" style="margin:6px 0 10px">One book, every step shown, pauses for ENTER. Best for presenting.</p>
+        <pre style="margin:0">uv run python demo.py</pre>
+      </div>
+      <div class="card">
+        <b>Ingest + interactive Q&amp;A</b>
+        <p class="muted small" style="margin:6px 0 10px">Any number of books in <code>books/</code>, then ask your own questions.</p>
+        <pre style="margin:0">uv run python rag_pipeline.py
+uv run python interactive.py</pre>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Run from <code>demos/live/rag_pipeline/</code>. Needs <code>ollama serve</code> running with
+      <code>nomic-embed-text</code> and <code>llama3.1:8b</code> pulled.</p>
+  </section>
+
+  <section>
+    <h2>Configuration at a glance</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th><code>demo.py</code></th><th><code>rag_pipeline.py</code> / <code>interactive.py</code></th></tr></thead>
+        <tbody>
+          <tr><td>Source</td><td><code>books/alice.txt</code></td><td>all <code>books/**/*.txt</code></td></tr>
+          <tr><td>Chunk size / overlap</td><td>500 / 80</td><td>1000 / 200</td></tr>
+          <tr><td>Embedding model</td><td colspan="2"><code>nomic-embed-text</code> (768-dim)</td></tr>
+          <tr><td>LLM</td><td colspan="2"><code>llama3.1:8b</code>, temperature 0 (swap with <code>:model NAME</code> in the REPL)</td></tr>
+          <tr><td>Top-k</td><td>4</td><td>4 (change with <code>--k</code> or <code>:k N</code>)</td></tr>
+          <tr><td>Store</td><td><code>./chroma_db_alice</code>, collection <code>alice_in_wonderland</code>, rebuilt every run</td><td><code>./chroma_db</code>, collection <code>old_books</code>, incremental</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Troubleshooting</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>ConnectError</code> / connection refused</td><td>Start Ollama: <code>ollama serve</code></td></tr>
+          <tr><td><code>model '…' not found (404)</code></td><td><code>ollama pull nomic-embed-text</code> and <code>ollama pull llama3.1:8b</code></td></tr>
+          <tr><td><code>Book not found: books/alice.txt</code></td><td>Run the script from <code>demos/live/rag_pipeline/</code></td></tr>
+          <tr><td><code>interactive.py</code>: “No vector store” / “Collection is empty”</td><td>Run <code>python rag_pipeline.py</code> first</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Part of <code>SoftwareDevelopmentWithAI/demos/live/rag_pipeline</code>. Figures are from a real run on Apple Silicon. The vector bars and 2-D map are illustrative.</footer>
+</main>
+
+<script>
+  // Theme toggle (remembered per browser, if storage is available)
+  (function () {
+    const root = document.documentElement;
+    try { const t = localStorage.getItem("rag-demo-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      const dark = root.dataset.theme
+        ? root.dataset.theme === "dark"
+        : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+      try { localStorage.setItem("rag-demo-theme", root.dataset.theme); } catch (e) {}
+    });
+  })();
+
+  // Illustrative embedding bars: two similar chunks share a base pattern, one unrelated chunk does not
+  (function () {
+    function rng(seed) { return function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }; }
+    const N = 48, base = [], r0 = rng(7);
+    for (let i = 0; i < N; i++) base.push(r0() * 2 - 1);
+    const rows = [
+      { label: "“…‘If you knew Time as well as I do,’ said the Hatter…”", color: "var(--c2)", seed: 11, mix: 0.2 },
+      { label: "“…‘it’s always tea-time, and we’ve no time to wash the things…’”", color: "var(--c2)", seed: 23, mix: 0.25 },
+      { label: "“…the Queen’s croquet-ground… the flamingoes and hedgehogs…”", color: "var(--c3)", seed: 41, mix: 1 },
+    ];
+    const host = document.getElementById("vecViz");
+    rows.forEach(function (row) {
+      const rnd = rng(row.seed), wrap = document.createElement("div"), bars = document.createElement("div");
+      wrap.className = "vec-row";
+      wrap.innerHTML = '<div class="label"></div>';
+      wrap.firstChild.textContent = row.label;
+      bars.className = "bars";
+      for (let i = 0; i < N; i++) {
+        const v = base[i] * (1 - row.mix) + (rnd() * 2 - 1) * row.mix;
+        const s = document.createElement("span"), h = Math.max(2, Math.abs(v) * 48);
+        // positive values grow up from the midline, negative grow down
+        s.style.background = v >= 0
+          ? "linear-gradient(to bottom, transparent " + (50 - h) + "%, " + row.color + " " + (50 - h) + "%, " + row.color + " 50%, transparent 50%)"
+          : "linear-gradient(to bottom, transparent 50%, " + row.color + " 50%, " + row.color + " " + (50 + h) + "%, transparent " + (50 + h) + "%)";
+        s.style.opacity = 0.4 + Math.abs(v) * 0.6;
+        s.style.height = "100%";
+        bars.appendChild(s);
+      }
+      wrap.appendChild(bars);
+      host.appendChild(wrap);
+    });
+  })();
+</script>
+</body>
+</html>
