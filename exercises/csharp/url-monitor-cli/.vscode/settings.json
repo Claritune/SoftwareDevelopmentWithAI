@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^dotnet test tests/UrlMonitor\\.Tests/UrlMonitor\\.Tests\\.csproj --no-restore$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
