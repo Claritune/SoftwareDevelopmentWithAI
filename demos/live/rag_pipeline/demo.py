@@ -13,6 +13,7 @@ Run: uv run python demo.py
 
 import sys
 import textwrap
+import uuid
 from pathlib import Path
 
 import httpx
@@ -159,7 +160,8 @@ def step3_embed(chunks: list[Document]) -> tuple[OllamaEmbeddings, list[list[flo
     return emb_fn, vectors
 
 
-def step4_store(chunks: list[Document], emb_fn: OllamaEmbeddings):
+def step4_store(chunks: list[Document], vectors: list[list[float]],
+                emb_fn: OllamaEmbeddings):
     header("STEP 4 — Store embeddings in ChromaDB")
     print(f"  Directory  : {CHROMA_DIR}")
     print(f"  Collection : {COLLECTION}")
@@ -179,11 +181,17 @@ def step4_store(chunks: list[Document], emb_fn: OllamaEmbeddings):
         embedding_function=emb_fn,
     )
 
+    # reuse the vectors from step 3 instead of re-embedding every chunk
     BATCH = 500
     print(f"\n  Writing in batches of {BATCH}…")
     for start in range(0, len(chunks), BATCH):
         batch = chunks[start:start + BATCH]
-        vectorstore.add_documents(batch)
+        vectorstore._collection.add(
+            ids=[str(uuid.uuid4()) for _ in batch],
+            embeddings=vectors[start:start + BATCH],
+            documents=[c.page_content for c in batch],
+            metadatas=[c.metadata for c in batch],
+        )
         end = min(start + BATCH, len(chunks))
         print(f"    stored {end}/{len(chunks)}", end="\r", flush=True)
     print(f"    {len(chunks)}/{len(chunks)} chunks stored.          ")
@@ -273,10 +281,10 @@ def main():
     chunks = step2_chunk(text)
 
     pause("Step 3 — Embed (calls Ollama, takes ~1–2 min)")
-    emb_fn, _ = step3_embed(chunks)
+    emb_fn, vectors = step3_embed(chunks)
 
     pause("Step 4 — Store in ChromaDB")
-    vectorstore = step4_store(chunks, emb_fn)
+    vectorstore = step4_store(chunks, vectors, emb_fn)
 
     pause("Step 5 — Search & Answer")
     step5_rag(vectorstore, emb_fn)
