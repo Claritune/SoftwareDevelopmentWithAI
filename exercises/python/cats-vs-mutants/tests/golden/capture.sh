@@ -2,7 +2,7 @@
 # Rebuilds the reference output from the C++ implementation.
 # Usage (from the project root): sh tests/golden/capture.sh [path/to/cats]
 set -u
-CATS="${1:-/Users/bigromanov/Code/ai/corecpp/cvm/build/cats}"
+CATS="${1:-../../cpp/cats-vs-mutants/build/cats}"
 OUT=tests/golden
 
 run() {  # run <name> <script path>

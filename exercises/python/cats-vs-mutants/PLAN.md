@@ -1,6 +1,6 @@
 # Cats vs Mutants: Python port plan
 
-Port of the C++20 game *Cats vs Mutants* in `/Users/bigromanov/Code/ai/corecpp/cvm` to Python, in this folder.
+Port of the C++20 game *Cats vs Mutants* in `exercises/cpp/cats-vs-mutants` to Python, in this folder.
 The Python project is named **cats-vs-mutants** (distribution `cats-vs-mutants`, import package
 `cats_vs_mutants`, console command `cats-vs-mutants`). Game content (mutant types, sprites,
 texts) stays as in the C++ version so the output stays identical.
@@ -104,7 +104,7 @@ Each phase ends with all its tests green before the next starts.
   `src/cats_vs_mutants` package skeleton, `uv sync`, empty `pytest` run.
 - Copy `scripts/demo.txt`.
 - Capture golden output from the existing C++ build with `sh tests/golden/capture.sh`
-  (defaults to `/Users/bigromanov/Code/ai/corecpp/cvm/build/cats`): `scripts/demo.txt` plus
+  (defaults to `../../cpp/cats-vs-mutants/build/cats`): `scripts/demo.txt` plus
   edge-case scripts in `tests/golden/scripts/` (unknown command, bad place/remove/tick, every
   place failure, comment and whitespace parsing) and a missing script file.
 - `tests/test_golden_data.py` sanity-checks the captured reference.

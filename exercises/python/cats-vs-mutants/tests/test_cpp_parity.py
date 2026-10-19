@@ -13,7 +13,8 @@ import pytest
 
 from cats_vs_mutants.ui.headless import run_headless
 
-CPP_BIN = Path(os.environ.get("CVM_CPP_BIN", "/Users/bigromanov/Code/ai/corecpp/cvm/build/cats"))
+DEFAULT_CPP_BIN = Path(__file__).resolve().parents[3] / "cpp" / "cats-vs-mutants" / "build" / "cats"
+CPP_BIN = Path(os.environ.get("CVM_CPP_BIN", DEFAULT_CPP_BIN))
 
 pytestmark = pytest.mark.skipif(not CPP_BIN.exists(), reason=f"C++ binary not found: {CPP_BIN}")
 
