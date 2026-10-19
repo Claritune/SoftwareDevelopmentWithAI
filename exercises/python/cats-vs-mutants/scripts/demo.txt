@@ -1,0 +1,84 @@
+# Cats vs Mutants demo: a full winning game.
+# Run with: ./build/cats --headless scripts/demo.txt
+
+place rich 2 0
+tick 1
+place rich 1 0
+tick 1
+place rich 3 0
+tick 79
+place rich 0 0
+tick 19
+place rich 4 0
+tick 62
+place hissing 2 1
+tick 79
+place hissing 0 1
+tick 59
+place hissing 4 1
+tick 22
+place hissing 1 1
+tick 78
+# --- end of wave 1 ---
+print
+
+tick 1
+place hissing 3 1
+tick 79
+place hissing 2 2
+tick 20
+place hissing 1 2
+tick 61
+place hissing 3 2
+tick 79
+place hissing 0 2
+tick 20
+place hissing 4 2
+tick 100
+# --- end of wave 2 ---
+print
+
+tick 30
+place sleepy 2 6
+tick 11
+place laser 2 3
+tick 81
+place laser 3 3
+tick 48
+place sleepy 3 6
+tick 80
+place sleepy 1 6
+tick 31
+place laser 1 3
+tick 59
+# --- wave 3 in full swing ---
+print
+
+tick 20
+place hissing 1 2
+tick 20
+place hissing 1 1
+tick 61
+place hissing 1 1
+tick 80
+place hissing 1 1
+tick 27
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 40
+place rich 1 0
+tick 32
+place laser 0 3
+tick 29
+tick 100   # extra ticks are harmless once the game is over

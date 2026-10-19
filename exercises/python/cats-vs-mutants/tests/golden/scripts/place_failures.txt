@@ -1,0 +1,12 @@
+# Every PlaceResult failure, plus remove on an empty cell.
+place laser 0 0      # 150 treats: not enough for a laser
+place rich 0 0
+place rich 0 0       # occupied
+place rich 5 0       # lane out of bounds
+place rich 0 9       # col out of bounds
+place rich -1 0
+remove 3 3           # nothing there
+tick 500             # no defense: lost at tick 421
+place rich 1 1       # game over
+remove 0 0           # game over
+print

@@ -1,0 +1,124 @@
+TREATS: 75   WAVE 1/3   LIVES: 3   TICK: 400   STATUS: Playing
++------------------------------------------------------+
+|=$.$= =^o^=   .     .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^=   .     .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^=   .     .     .     .     .     .     .   |
+|                                                      |
+|=$.$=   .     .     .     .     .     .     .     .   |
+|                        (x_x)                         |
+|=$.$= =^o^=   .     .     .     .     .     .     .   |
+|                                                      |
++------------------------------------------------------+
+cat     =$.$= lane 2 col 0 hp 40
+cat     =$.$= lane 1 col 0 hp 40
+cat     =$.$= lane 3 col 0 hp 40
+cat     =$.$= lane 0 col 0 hp 40
+cat     =$.$= lane 4 col 0 hp 40
+cat     =^o^= lane 2 col 1 hp 60
+cat     =^o^= lane 0 col 1 hp 60
+cat     =^o^= lane 4 col 1 hp 60
+cat     =^o^= lane 1 col 1 hp 60
+mutant  (x_x) lane 3 pos 40 hp 100
+
+TREATS: 150   WAVE 2/3   LIVES: 3   TICK: 760   STATUS: Playing
++------------------------------------------------------+
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
++------------------------------------------------------+
+cat     =$.$= lane 2 col 0 hp 40
+cat     =$.$= lane 1 col 0 hp 40
+cat     =$.$= lane 3 col 0 hp 40
+cat     =$.$= lane 0 col 0 hp 40
+cat     =$.$= lane 4 col 0 hp 40
+cat     =^o^= lane 2 col 1 hp 60
+cat     =^o^= lane 0 col 1 hp 60
+cat     =^o^= lane 4 col 1 hp 60
+cat     =^o^= lane 1 col 1 hp 60
+cat     =^o^= lane 3 col 1 hp 30
+cat     =^o^= lane 2 col 2 hp 60
+cat     =^o^= lane 1 col 2 hp 60
+cat     =^o^= lane 3 col 2 hp 60
+cat     =^o^= lane 0 col 2 hp 60
+cat     =^o^= lane 4 col 2 hp 60
+
+TREATS: 75   WAVE 3/3   LIVES: 3   TICK: 1100   STATUS: Playing
++------------------------------------------------------+
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
+|=$.$= =^o^=   .   =O.O=   .     .   =-.-=   .     .   |
+|      ( _ )                         <O_O>             |
+|=$.$= =^o^= =^o^= =O.O=   .     .   =-.-=   .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^= =O.O=   .     .   =-.-=   .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
++------------------------------------------------------+
+cat     =$.$= lane 2 col 0 hp 40
+cat     =$.$= lane 1 col 0 hp 40
+cat     =$.$= lane 3 col 0 hp 40
+cat     =$.$= lane 0 col 0 hp 40
+cat     =$.$= lane 4 col 0 hp 40
+cat     =^o^= lane 2 col 1 hp 60
+cat     =^o^= lane 0 col 1 hp 60
+cat     =^o^= lane 4 col 1 hp 60
+cat     =^o^= lane 1 col 1 hp 30
+cat     =^o^= lane 3 col 1 hp 30
+cat     =^o^= lane 2 col 2 hp 60
+cat     =^o^= lane 3 col 2 hp 60
+cat     =^o^= lane 0 col 2 hp 60
+cat     =^o^= lane 4 col 2 hp 60
+cat     =-.-= lane 2 col 6 hp 280
+cat     =O.O= lane 2 col 3 hp 60
+cat     =O.O= lane 3 col 3 hp 60
+cat     =-.-= lane 3 col 6 hp 270
+cat     =-.-= lane 1 col 6 hp 280
+cat     =O.O= lane 1 col 3 hp 60
+mutant  ( _ ) lane 1 pos 19 hp 1
+mutant  <O_O> lane 1 pos 69 hp 70
+
+=== FINAL STATE ===
+TREATS: 0   WAVE 3/3   LIVES: 3   TICK: 1648   STATUS: Won
++------------------------------------------------------+
+|=$.$= =^o^= =^o^= =O.O=   .     .     .     .     .   |
+|                                                      |
+|  .   =^o^= =^o^= =O.O=   .     .   =-.-=   .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^= =O.O=   .     .   =-.-=   .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^= =O.O=   .     .   =-.-=   .     .   |
+|                                                      |
+|=$.$= =^o^= =^o^=   .     .     .     .     .     .   |
+|                                                      |
++------------------------------------------------------+
+cat     =$.$= lane 2 col 0 hp 40
+cat     =$.$= lane 3 col 0 hp 40
+cat     =$.$= lane 0 col 0 hp 40
+cat     =$.$= lane 4 col 0 hp 40
+cat     =^o^= lane 2 col 1 hp 60
+cat     =^o^= lane 0 col 1 hp 60
+cat     =^o^= lane 4 col 1 hp 60
+cat     =^o^= lane 3 col 1 hp 30
+cat     =^o^= lane 2 col 2 hp 60
+cat     =^o^= lane 3 col 2 hp 60
+cat     =^o^= lane 0 col 2 hp 60
+cat     =^o^= lane 4 col 2 hp 60
+cat     =-.-= lane 2 col 6 hp 280
+cat     =O.O= lane 2 col 3 hp 60
+cat     =O.O= lane 3 col 3 hp 60
+cat     =-.-= lane 3 col 6 hp 270
+cat     =-.-= lane 1 col 6 hp 250
+cat     =O.O= lane 1 col 3 hp 60
+cat     =^o^= lane 1 col 2 hp 60
+cat     =^o^= lane 1 col 1 hp 60
+cat     =O.O= lane 0 col 3 hp 60

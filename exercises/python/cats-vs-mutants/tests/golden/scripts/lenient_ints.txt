@@ -1,0 +1,5 @@
+tick +3
+tick 2abc
+place rich 1 2junk
+remove 0 0x
+print

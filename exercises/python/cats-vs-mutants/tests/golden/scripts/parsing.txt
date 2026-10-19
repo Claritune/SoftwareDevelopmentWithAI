@@ -1,0 +1,8 @@
+
+   # indented comment
+tick 3 extra tokens are ignored
+	tick	2	# tabs
+place hissing 2 4# comment right after a number
+print
+tick 150
+print
