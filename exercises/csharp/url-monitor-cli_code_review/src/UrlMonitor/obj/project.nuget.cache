@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "XCK32yhyPcc=",
+  "dgSpecHash": "AqucLK4FIQc=",
   "success": true,
-  "projectFilePath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/UrlMonitor.csproj",
+  "projectFilePath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/UrlMonitor.csproj",
   "expectedPackageFiles": [
     "/Users/bigromanov/.nuget/packages/yamldotnet/16.3.0/yamldotnet.16.3.0.nupkg.sha512"
   ],

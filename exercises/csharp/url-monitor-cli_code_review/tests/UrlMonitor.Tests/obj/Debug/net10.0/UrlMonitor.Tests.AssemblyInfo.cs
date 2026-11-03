@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UrlMonitor.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e432bed28f35eeb102818dfe9a641f29ade695e3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b69c1850d02c9d3a3b2a76d3f99072cebaaefe29")]
 [assembly: System.Reflection.AssemblyProductAttribute("UrlMonitor.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UrlMonitor.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

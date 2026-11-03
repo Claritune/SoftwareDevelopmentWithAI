@@ -889,11 +889,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
+      "projectUniqueName": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
       "projectName": "UrlMonitor.Tests",
-      "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
+      "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
       "packagesPath": "/Users/bigromanov/.nuget/packages/",
-      "outputPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/tests/UrlMonitor.Tests/obj/",
+      "outputPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/tests/UrlMonitor.Tests/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/bigromanov/.nuget/NuGet/NuGet.Config"
@@ -909,8 +909,8 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/UrlMonitor.csproj": {
-              "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/UrlMonitor.csproj"
+            "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/UrlMonitor.csproj": {
+              "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/UrlMonitor.csproj"
             }
           }
         }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MlQZ2RmH/18=",
+  "dgSpecHash": "NHJ225Q1g9g=",
   "success": true,
-  "projectFilePath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
+  "projectFilePath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/tests/UrlMonitor.Tests/UrlMonitor.Tests.csproj",
   "expectedPackageFiles": [
     "/Users/bigromanov/.nuget/packages/microsoft.codecoverage/17.10.0/microsoft.codecoverage.17.10.0.nupkg.sha512",
     "/Users/bigromanov/.nuget/packages/microsoft.net.test.sdk/17.10.0/microsoft.net.test.sdk.17.10.0.nupkg.sha512",

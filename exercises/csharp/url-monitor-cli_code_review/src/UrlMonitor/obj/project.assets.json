@@ -53,11 +53,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/UrlMonitor.csproj",
+      "projectUniqueName": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/UrlMonitor.csproj",
       "projectName": "UrlMonitor",
-      "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/UrlMonitor.csproj",
+      "projectPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/UrlMonitor.csproj",
       "packagesPath": "/Users/bigromanov/.nuget/packages/",
-      "outputPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/solutions/csharp/url-monitor-cli/src/UrlMonitor/obj/",
+      "outputPath": "/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/exercises/csharp/url-monitor-cli_code_review/src/UrlMonitor/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/bigromanov/.nuget/NuGet/NuGet.Config"
