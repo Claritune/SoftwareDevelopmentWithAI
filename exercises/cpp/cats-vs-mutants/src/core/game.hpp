@@ -35,6 +35,7 @@ private:
     void resolveHits();
     void moveMutants();
     void resolveBites();
+    void wearOffStuns();
     void removeDead();
     void handleMutantsAtHome();
     void checkEndConditions();
@@ -43,6 +44,7 @@ private:
     Cat* mutableCatAt(int lane, int col);
     bool anyMutantInRange(int lane, int fromCol, int toCol) const;
     void damage(Mutant& mutant, int amount) const;
+    void ambush(Mutant& mutant);
 
     Config config_;
     std::vector<SpawnEvent> waves_;

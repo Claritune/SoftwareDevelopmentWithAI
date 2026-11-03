@@ -18,6 +18,7 @@ add_executable(cvm_tests
   end_conditions_test.cpp
   waves_config_test.cpp
   full_game_test.cpp
+  boxer_test.cpp
 )
 target_link_libraries(cvm_tests PRIVATE cvm_core GTest::gtest_main)
 target_compile_options(cvm_tests PRIVATE ${CVM_WARNINGS})

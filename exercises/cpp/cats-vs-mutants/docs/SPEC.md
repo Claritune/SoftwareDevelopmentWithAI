@@ -46,6 +46,7 @@ macOS). GoogleTest is fetched automatically on the first configure.
 | Hissing Cat | `=^o^=` | 100 | 60 | Spits a hairball (20 dmg) every 15 ticks if a mutant is in its lane |
 | Sleepy Cat | `=-.-=` | 50 | 300 | Blocks mutants |
 | Laser Cat | `=O.O=` | 175 | 60 | Every 30 ticks, 30 dmg to all mutants within 4 cells |
+| Boxer Cat | `[^.^]` | 25 | 20 | One-shot trap: the first eligible mutant to enter its cell takes 40 dmg and is stunned for 50 ticks; the Boxer Cat is used up |
 
 | Mutant | Sprite | Health | Speed | Special |
 |---|---|---|---|---|
@@ -76,8 +77,8 @@ Three fixed waves (`defaultWaves()` in `src/core/waves.cpp`), each roughly 300 t
 3. Spawn mutants scheduled for this tick
 4. Cats fire (hairballs created, laser damage applied)
 5. Move hairballs and resolve hits
-6. Move mutants (respecting blocking and Hopper jumps)
-7. Resolve bites
+6. Move mutants (stuns, Boxer ambushes, blocking, Hopper jumps)
+7. Resolve bites (stunned mutants don't bite), then stun counters tick down
 8. Remove dead cats and dead mutants
 9. Handle mutants reaching home
 10. Check win and lose conditions
@@ -99,6 +100,19 @@ The original spec left a few points open. This is how the code decides them:
   If `c` is 0, that is home.
 - **Bite timer** resets to 10 whenever the mutant is not blocked.
 - **Lives** are clamped to 0 when the game is lost.
+- **Boxer ambush**: in step 6, mutants are processed in spawn order. When a live mutant that
+  is not the Equivalent Mutant, not stunned and never ambushed before is processed in the cell
+  of a Boxer Cat, it takes `ambushDamage` (40), its stun counter is set to `stunDuration` (50),
+  its move cooldown resets to its `moveInterval`, it is marked ambushed, and the Boxer Cat is
+  removed at once (a later mutant in that cell moves normally in the same step). The ambushed
+  mutant doesn't move that tick. The ambush is checked before the Hopper jump, so an ambushed
+  Hopper keeps its jump. Any other mutant treats a Boxer Cat as an ordinary cat: blocked,
+  bites, Hoppers jump it.
+- **Stun**: a stunned mutant (stun counter above 0) doesn't move or jump (move cooldown
+  frozen), doesn't bite (bite timer reset every stunned tick), but can still be hit and counts
+  as on the board. Stun counters decrement at the end of step 7. With the defaults a mutant
+  ambushed on tick T first steps on tick T + 50 + moveInterval - 1. In headless `print`, a
+  stunned mutant's line ends with ` stun <n>`.
 - `SpawnEvent` has an extra `wave` field, used for the `WAVE n/3` header.
 - `Config::seed` exists, but the shipped rules use no randomness.
 
@@ -108,6 +122,7 @@ The original spec left a few points open. This is how the code decides them:
 |---|---|
 | Arrow keys | Move cursor |
 | `1` to `4` | Select Rich (50), Hissing (100), Sleepy (50), Laser (175) |
+| `6` | Select Boxer (25) (`5` is reserved) |
 | Space / Enter | Place selected cat at cursor |
 | `x` | Remove cat at cursor (no refund) |
 | `p` | Pause |
@@ -121,7 +136,7 @@ Each lane is drawn as two rows: cats on top, mutants and hairballs below.
 state. One command per line; `#` starts a comment.
 
 ```
-place <cat> <lane> <col>     # cat = rich | hissing | sleepy | laser
+place <cat> <lane> <col>     # cat = rich | hissing | sleepy | laser | boxer
 remove <lane> <col>
 tick <n>
 print

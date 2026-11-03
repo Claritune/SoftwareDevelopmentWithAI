@@ -28,6 +28,8 @@ struct Mutant {
     int moveCooldown;  // ticks until the next step
     int biteCooldown;  // ticks until the next bite while blocked
     bool hasJumped;    // Hopper only: true once it has used its jump
+    int stunTicks = 0;      // > 0 while stunned; set by a Boxer Cat ambush
+    bool ambushed = false;  // true once a Boxer Cat has ambushed this mutant (at most once)
 
     bool operator==(const Mutant&) const = default;
 };

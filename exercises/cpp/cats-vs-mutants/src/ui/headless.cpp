@@ -17,6 +17,7 @@ std::optional<CatType> parseCat(const std::string& name) {
     if (name == "hissing") return CatType::Hissing;
     if (name == "sleepy") return CatType::Sleepy;
     if (name == "laser") return CatType::Laser;
+    if (name == "boxer") return CatType::Boxer;
     return std::nullopt;
 }
 
@@ -44,7 +45,9 @@ void printState(const Game& game, std::ostream& out) {
     }
     for (const Mutant& m : s.mutants) {
         out << "mutant  " << mutantSprite(m.type) << " lane " << m.lane << " pos " << m.position
-            << " hp " << m.health << '\n';
+            << " hp " << m.health;
+        if (m.stunTicks > 0) out << " stun " << m.stunTicks;
+        out << '\n';
     }
     for (const Hairball& h : s.hairballs) {
         out << "hairball  o   lane " << h.lane << " pos " << h.position << '\n';

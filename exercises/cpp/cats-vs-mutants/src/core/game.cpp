@@ -44,8 +44,9 @@ void Game::tick() {
     fireCats();             // 4. Cats fire (hairballs created, laser damage applied)
     moveHairballs();        // 5. Move hairballs...
     resolveHits();          //    ...and resolve hits
-    moveMutants();          // 6. Move mutants (respecting blocking and Hopper jumps)
-    resolveBites();         // 7. Resolve bites
+    moveMutants();          // 6. Move mutants (stuns, Boxer ambushes, blocking, Hopper jumps)
+    resolveBites();         // 7. Resolve bites (stunned mutants don't bite)...
+    wearOffStuns();         //    ...then stun counters tick down
     removeDead();           // 8. Remove dead cats and dead mutants
     handleMutantsAtHome();  // 9. Handle mutants reaching home
     checkEndConditions();   // 10. Check win and lose conditions
@@ -80,7 +81,8 @@ void Game::spawnMutants() {
         const SpawnEvent& e = waves_[state_.nextSpawn++];
         const MutantStats& stats = config_.mutant(e.type);
         state_.mutants.push_back(Mutant{e.type, e.lane, config_.spawnPosition(), stats.health,
-                                        stats.moveInterval, config_.biteInterval, false});
+                                        stats.moveInterval, config_.biteInterval, false, 0,
+                                        false});
     }
 }
 
@@ -133,8 +135,16 @@ void Game::resolveHits() {
 
 void Game::moveMutants() {
     for (Mutant& m : state_.mutants) {
-        if (m.health <= 0) continue;
+        // Dead, or stunned: no move, no jump, cooldown frozen.
+        if (m.health <= 0 || m.stunTicks > 0) continue;
         const Cat* blocker = catAt(m.lane, cellOf(m.position));
+        // A Boxer Cat ambushes the first eligible mutant in its cell, before any Hopper jump.
+        // An ambushed mutant doesn't move this tick. Other mutants treat it as a normal cat.
+        if (blocker != nullptr && blocker->type == CatType::Boxer && !m.ambushed &&
+            m.type != MutantType::Equivalent) {
+            ambush(m);
+            continue;
+        }
         if (blocker != nullptr) {
             if (m.type == MutantType::Hopper && !m.hasJumped) {
                 m.hasJumped = true;
@@ -153,6 +163,10 @@ void Game::moveMutants() {
 void Game::resolveBites() {
     for (Mutant& m : state_.mutants) {
         if (m.health <= 0) continue;
+        if (m.stunTicks > 0) {
+            m.biteCooldown = config_.biteInterval;  // no bite; timer reset every stunned tick
+            continue;
+        }
         Cat* cat = mutableCatAt(m.lane, cellOf(m.position));
         if (cat == nullptr) {
             m.biteCooldown = config_.biteInterval;
@@ -162,6 +176,12 @@ void Game::resolveBites() {
             m.biteCooldown = config_.biteInterval;
             cat->health -= config_.biteDamage;
         }
+    }
+}
+
+void Game::wearOffStuns() {
+    for (Mutant& m : state_.mutants) {
+        if (m.stunTicks > 0) --m.stunTicks;
     }
 }
 
@@ -212,6 +232,19 @@ bool Game::anyMutantInRange(int lane, int fromCol, int toCol) const {
 void Game::damage(Mutant& mutant, int amount) const {
     if (mutant.type == MutantType::Equivalent) return;
     mutant.health -= amount;
+}
+
+// The Boxer Cat in the mutant's cell springs: damage, stun, reset the move cooldown, mark the
+// mutant as ambushed and use up the box. Erases by lane and column (copied first), because
+// erase_if moves cats and would invalidate any reference into state_.cats.
+void Game::ambush(Mutant& mutant) {
+    const int lane = mutant.lane;
+    const int col = cellOf(mutant.position);
+    damage(mutant, config_.ambushDamage);
+    mutant.stunTicks = config_.stunDuration;
+    mutant.moveCooldown = config_.mutant(mutant.type).moveInterval;
+    mutant.ambushed = true;
+    std::erase_if(state_.cats, [&](const Cat& c) { return c.lane == lane && c.col == col; });
 }
 
 }  // namespace cvm

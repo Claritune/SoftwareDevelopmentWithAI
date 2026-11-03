@@ -4,7 +4,7 @@
 
 namespace cvm {
 
-enum class CatType { Rich, Hissing, Sleepy, Laser };
+enum class CatType { Rich, Hissing, Sleepy, Laser, Boxer };
 enum class MutantType { Blob, Runner, Brute, Hopper, Equivalent };
 
 struct CatStats {
@@ -56,12 +56,18 @@ struct Config {
     // Reserved for any future randomness; core never uses std::random_device.
     std::uint32_t seed = 42;
 
+    // Boxer Cat
+    CatStats boxer{25, 20, 0};
+    int ambushDamage = 40;
+    int stunDuration = 50;  // stun counter value set on ambush (ticks stunned, counting tick T)
+
     const CatStats& cat(CatType type) const {
         switch (type) {
             case CatType::Rich: return rich;
             case CatType::Hissing: return hissing;
             case CatType::Sleepy: return sleepy;
             case CatType::Laser: return laser;
+            case CatType::Boxer: return boxer;
         }
         return rich;
     }

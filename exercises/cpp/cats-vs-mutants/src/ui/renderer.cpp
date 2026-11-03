@@ -11,7 +11,24 @@ namespace {
 constexpr int kCellWidth = 6;  // 5 character sprite plus a space
 constexpr int kRowsPerLane = 3;  // cat row, mutant row, separator
 
-enum ColorPair : short { kCatColor = 1, kMutantColor = 2, kHairballColor = 3 };
+enum ColorPair : short {
+    kCatColor = 1,
+    kMutantColor = 2,
+    kHairballColor = 3,
+    kStunnedColor = 4,
+};
+
+// The frontmost mutant in the cell, or nullptr if there is none.
+const Mutant* frontMutant(const Game& game, int lane, int col) {
+    const Mutant* front = nullptr;
+    for (const Mutant& m : game.state().mutants) {
+        if (m.lane == lane && m.position >= 0 && game.cellOf(m.position) == col &&
+            (front == nullptr || m.position < front->position)) {
+            front = &m;
+        }
+    }
+    return front;
+}
 
 }  // namespace
 
@@ -21,6 +38,7 @@ const char* catSprite(CatType type) {
         case CatType::Hissing: return "=^o^=";
         case CatType::Sleepy: return "=-.-=";
         case CatType::Laser: return "=O.O=";
+        case CatType::Boxer: return "[^.^]";
     }
     return "?????";
 }
@@ -31,6 +49,7 @@ const char* catName(CatType type) {
         case CatType::Hissing: return "Hissing Cat";
         case CatType::Sleepy: return "Sleepy Cat";
         case CatType::Laser: return "Laser Cat";
+        case CatType::Boxer: return "Boxer Cat";
     }
     return "Cat";
 }
@@ -84,13 +103,7 @@ std::string cellText(const Game& game, int lane, int col, int row) {
     }
 
     // The frontmost mutant in the cell wins; otherwise show a hairball.
-    const Mutant* front = nullptr;
-    for (const Mutant& m : game.state().mutants) {
-        if (m.lane == lane && m.position >= 0 && game.cellOf(m.position) == col &&
-            (front == nullptr || m.position < front->position)) {
-            front = &m;
-        }
-    }
+    const Mutant* front = frontMutant(game, lane, col);
     if (front != nullptr) return mutantSprite(front->type);
 
     std::string text = "     ";
@@ -122,8 +135,9 @@ Renderer::Renderer() {
         start_color();
         use_default_colors();
         init_pair(kCatColor, COLOR_YELLOW, -1);
-        init_pair(kMutantColor, COLOR_GREEN, -1);
+        init_pair(kMutantColor, COLOR_RED, -1);
         init_pair(kHairballColor, COLOR_WHITE, -1);
+        init_pair(kStunnedColor, COLOR_YELLOW, -1);
         colors_ = true;
     }
 }
@@ -149,8 +163,8 @@ void Renderer::draw(const Game& game, const UiState& ui) {
     const int bottom = boardTop + cfg.lanes * kRowsPerLane + 1;
     mvprintw(bottom, 0, "Selected: %s %s   %s", catName(ui.selected), catSprite(ui.selected),
              ui.message.c_str());
-    mvprintw(bottom + 1, 0, "1 Rich %d  2 Hissing %d  3 Sleepy %d  4 Laser %d", cfg.rich.cost,
-             cfg.hissing.cost, cfg.sleepy.cost, cfg.laser.cost);
+    mvprintw(bottom + 1, 0, "1 Rich %d  2 Hissing %d  3 Sleepy %d  4 Laser %d  6 Boxer %d",
+             cfg.rich.cost, cfg.hissing.cost, cfg.sleepy.cost, cfg.laser.cost, cfg.boxer.cost);
     mvaddstr(bottom + 2, 0, "Arrows move  Space/Enter place  x remove  p pause  q quit");
     refresh();
 }
@@ -182,6 +196,10 @@ void Renderer::drawBoard(const Game& game, const UiState& ui, int top) {
                     short pair = kCatColor;
                     // Sprites never start with a space; hairball rows always do.
                     if (row == 1) pair = text[0] == ' ' ? kHairballColor : kMutantColor;
+                    if (pair == kMutantColor) {
+                        const Mutant* front = frontMutant(game, lane, col);
+                        if (front != nullptr && front->stunTicks > 0) pair = kStunnedColor;
+                    }
                     attr |= COLOR_PAIR(pair) | A_BOLD;
                 }
                 if (cursor) attr |= A_REVERSE;

@@ -35,6 +35,7 @@ bool handleKey(int key, Game& game, UiState& ui) {
         case '2': ui.selected = CatType::Hissing; break;
         case '3': ui.selected = CatType::Sleepy; break;
         case '4': ui.selected = CatType::Laser; break;
+        case '6': ui.selected = CatType::Boxer; break;  // 5 is reserved for the Frosty Cat
         case 'p': case 'P': ui.paused = !ui.paused; break;
         case ' ': case '\n': case '\r': case KEY_ENTER:
             ui.message = cvm::ui::placeResultMessage(

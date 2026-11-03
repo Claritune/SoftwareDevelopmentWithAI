@@ -1,0 +1,13 @@
+# AC18 headless check for the Boxer Cat. Run: ./build/cats --headless docs/qa/boxer-cat-headless.txt
+# The shipped Blob scheduled at tick 200 in lane 0 spawns on 200, reaches 89 on 201 and is
+# ambushed on 202. It is stunned on ticks 202 to 251.
+place boxer 0 8
+print           # tick 0: [^.^] at lane 0 col 8
+tick 201
+print           # tick 201: box still there, Blob at 89 hp 100, no stun suffix
+tick 2
+print           # tick 203: box gone, Blob at 89 hp 60 stun 48
+tick 47
+print           # tick 250: last-but-one stunned tick, stun 1
+tick 1
+print           # tick 251: stun counter 0, no suffix
