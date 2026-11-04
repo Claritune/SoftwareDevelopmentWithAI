@@ -42,7 +42,7 @@ If the agent cannot call mem0 tools:
 2. **Pre-warm the uvx cache** — first `git+https://...` install takes ~12s, but Cursor's MCP cold-start timeout is 10s. Run once from terminal before enabling:
    ```bash
    MEM0_PROVIDER=ollama MEM0_LLM_MODEL=llama3.1:8b MEM0_USER_ID=demo-user \
-     /Users/bigromanov/.local/bin/uvx --from 'git+https://github.com/elvismdev/mem0-mcp-selfhosted.git@v0.3.2' \
+     uvx --from 'git+https://github.com/elvismdev/mem0-mcp-selfhosted.git@v0.3.2' \
      --with 'mcp[cli]>=1.23.0,<2' mem0-mcp-selfhosted
    ```
    (Ctrl+C after it starts — the cache is warm.)

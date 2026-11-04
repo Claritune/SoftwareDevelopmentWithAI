@@ -1,113 +1,3 @@
-# Maestro
-
-Maestro is a self-contained C++17 music renderer. Its deterministic runtime
-pipeline is:
-
-```text
-Composer -> Arranger -> Synth -> Critic
-```
-
-The Producer initializes the musical context and runs this full pipeline.
-Composer and Arranger work with symbolic notes; Synth renders audio samples; and
-Critic may request another complete pass.
-
-## Requirements
-
-- CMake 3.16 or newer
-- A C++17 compiler
-
-Maestro uses the C++ standard library only. No package installation, audio SDK,
-or network access is required.
-
-## Build and test
-
-From the repository root:
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-The executable is `build/maestro`. The project builds with `-Wall -Wextra`.
-Tests cover deterministic symbolic output and scale membership, Critic outcomes,
-and finite normalized mono audio samples.
-
-## Render and listen
-
-```bash
-./build/maestro \
-  --mood lofi --key A --scale minor --tempo 82 --seconds 20 \
-  --seed 7 --passes 2 --out song.wav
-```
-
-On success, Maestro reports the sample count, destination path, and final
-zero-based pipeline pass. It writes a 44.1 kHz, mono, 16-bit PCM WAV. The
-duration follows `--seconds`; the generated content follows the complete brief
-and its seed.
-
-On macOS, add `--play` to invoke `afplay` after the WAV is written:
-
-```bash
-./build/maestro --mood lofi --key A --scale minor --tempo 82 --seconds 20 \
-  --seed 7 --passes 2 --out song.wav --play
-```
-
-Playback depends on macOS and an available audio device. On other platforms,
-use a local WAV player after rendering.
-
-## CLI
-
-All flags except `--play` require a following value. Unknown flags, missing
-values, and non-numeric values for numeric flags are errors.
-
-| Flag | Default | Meaning |
-| --- | --- | --- |
-| `--mood <name>` | `lofi` | Selects composition, arrangement, and Critic density behavior. `lofi`, `chiptune`, `cinematic`, and `ambient` are implemented; another name uses `lofi` behavior. |
-| `--key <name>` | `A` | Tonic. Recognizes `C`, `C#`, `Db`, `D`, `D#`, `Eb`, `E`, `F`, `F#`, `Gb`, `G`, `G#`, `Ab`, `A`, `A#`, `Bb`, and `B`; another name falls back to `A`. |
-| `--scale <name>` | `minor` | `major`, `minor`, `dorian`, or `pentatonic`; another name uses `minor`. |
-| `--tempo <bpm>` | `82` | Initial tempo in beats per minute. |
-| `--seconds <duration>` | `3.0` | Requested duration in seconds. The command-line default is three seconds. |
-| `--seed <uint32>` | `7` | Shared musical RNG seed. Keep it fixed to reproduce output. |
-| `--passes <count>` | `2` | Maximum Critic-driven retries after the initial pass. A negative value disables retries. |
-| `--out <path>` | `song.wav` | Destination WAV path. Rendering fails if it cannot be written. |
-| `--play` | none | On macOS, invokes `afplay` for the output WAV after writing it. Playback depends on the platform and available audio device. |
-
-## Critic and retries
-
-Critic evaluates mood-specific note density, the fraction of simultaneous
-minor-second/tritone intervals, and dynamic range. It accepts a pass only when
-input and audio are valid, density is in range, dissonance is at most `0.20`,
-and dynamic range is at least `0.12`.
-
-An unacceptable pass with retries remaining restarts at Composer with the same
-seed. The Producer handles these suggestions:
-
-- `reduce_density`: subtract 8 BPM, with a 40 BPM floor.
-- `raise_energy`: add 8 BPM, with a 240 BPM ceiling.
-- `resolve_dissonance`: retry without a current parameter adjustment.
-
-The Producer stops on acceptance, on the final allowed pass, or with no Critic
-suggestion. `--passes 2` means the initial pass plus up to two retries; the final
-reported pass is therefore in `0..2`.
-
-## Verify deterministic output
-
-Render an identical brief twice and compare the WAV bytes:
-
-```bash
-./build/maestro --mood lofi --key A --scale minor --tempo 82 --seconds 3 --seed 7 --passes 2 --out first.wav
-./build/maestro --mood lofi --key A --scale minor --tempo 82 --seconds 3 --seed 7 --passes 2 --out second.wav
-cmake -E compare_files first.wav second.wav
-```
-
-`cmake -E compare_files` succeeds only when the files are byte-for-byte
-identical. A different `--seed` produces a different deterministic result.
-
-## Live demonstration
-
-The concise script for a build, render, test, reproducibility, and playback
-walkthrough is in [DEMO.md](DEMO.md).
 # 🎼 Maestro — A Multi-Agent Music Studio in C++
 
 > A small, self-contained C++ program that **composes and plays music** using a
@@ -227,6 +117,8 @@ maestro/
 │       ├── qa.agent.md
 │       └── docs.agent.md
 │
+│   (everything below is built live by the agents; the finished
+│    version is on the `maestro-demo-complete` branch)
 ├── CMakeLists.txt
 ├── include/maestro/       ← shared contracts (the "blackboard" types)
 │   ├── Contracts.h        ← Brief, Note, Track, Score, AudioBuffer, Critique
@@ -254,7 +146,7 @@ maestro/
 - A C++17 compiler (GCC 9+, Clang 10+, or MSVC 2019+)
 - CMake 3.16+
 - VS Code with the **GitHub Copilot** and **GitHub Copilot Chat** extensions
-  (agent mode + custom chat modes enabled)
+  (agent mode + custom agents enabled)
 
 No audio libraries are needed — Maestro writes a standard PCM `.wav` and lets your
 OS play it (`afplay` on macOS, `aplay`/`ffplay` on Linux, `start` on Windows).

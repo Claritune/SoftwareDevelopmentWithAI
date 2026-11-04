@@ -1,0 +1,6 @@
+langchain-core
+langchain-openai
+pandas
+matplotlib
+pydantic
+reportlab

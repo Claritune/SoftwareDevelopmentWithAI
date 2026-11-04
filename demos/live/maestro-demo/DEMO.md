@@ -1,161 +1,3 @@
-# Maestro Live Demo
-
-This script demonstrates the completed renderer in about 10 minutes.
-
-## Before the room
-
-- Have CMake 3.16+ and a C++17 compiler on `PATH`.
-- Confirm macOS audio playback with `afplay` if the demo will use `--play`.
-- Keep `README.md`, `SUBAGENTS.md`, and a terminal open.
-
-## 1. Build and test
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-The test suite covers deterministic symbolic output, scale membership, Critic
-outcomes, and finite normalized mono audio samples.
-
-## 2. Frame the runtime
-
-Show the delivered pipeline:
-
-```text
-Composer -> Arranger -> Synth -> Critic
-```
-
-Composer and Arranger create symbolic notes, Synth renders audio, and Critic
-can request a retry through the Producer. `SUBAGENTS.md` describes the separate
-development roles and their ownership boundaries.
-
-## 3. Render and play
-
-```bash
-./build/maestro \
-  --mood lofi --key A --scale minor --tempo 82 --seconds 12 \
-  --seed 7 --passes 2 --out maestro-demo.wav --play
-```
-
-The command writes a 44.1 kHz, mono, 16-bit PCM WAV, then invokes `afplay` on
-macOS. Playback is platform and audio-device dependent; without macOS playback,
-render the WAV and open it in a local player. Keys are note names such as `A`,
-`C#`, or `Eb`; an unsupported key falls back to `A`.
-
-## 4. Explain Critic retries
-
-Critic evaluates note density, simultaneous minor-second/tritone dissonance,
-and dynamic range. With retries available, `reduce_density` subtracts 8 BPM,
-`raise_energy` adds 8 BPM, and `resolve_dissonance` retries with no tempo
-change. `--passes 2` permits the initial pass plus up to two retries.
-
-## 5. Prove reproducibility
-
-```bash
-./build/maestro --mood chiptune --key C --scale major --tempo 120 --seconds 3 --seed 42 --passes 2 --out demo-a.wav
-./build/maestro --mood chiptune --key C --scale major --tempo 120 --seconds 3 --seed 42 --passes 2 --out demo-b.wav
-cmake -E compare_files demo-a.wav demo-b.wav
-```
-
-The comparison succeeds only when the WAV files are byte-for-byte identical.
-Changing `--seed` produces a different deterministic result.# Maestro Live Demo
-
-This is a repeatable walkthrough of the delivered renderer and the agent
-orchestration behind it. It takes about 10 minutes.
-
-## Before the room
-
-- Have CMake and a C++17 compiler on `PATH`.
-- Build and test once, and confirm `build/maestro` exists.
-- Test a local WAV player. On macOS use `afplay`; use an installed equivalent on
-   other platforms.
-- Keep `README.md`, `SUBAGENTS.md`, and a terminal open.
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-## Staged script
-
-### 1. Frame the pipeline (1 minute)
-
-Show:
-
-```text
-Composer -> Arranger -> Synth -> Critic
-```
-
-Composer and Arranger make symbolic music, Synth produces samples, and Critic
-can make the Producer rerun the entire pipeline. Point to `SUBAGENTS.md` to show
-the development roles and their explicit file ownership.
-
-### 2. Build and test (2 minutes)
-
-Run:
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-The suite demonstrates determinism, scale membership, Critic decisions, and
-finite normalized audio.
-
-### 3. Render (2 minutes)
-
-```bash
-./build/maestro \
-   --mood lofi --key A --scale minor --tempo 82 --seconds 12 \
-   --seed 7 --passes 2 --out maestro-demo.wav
-```
-
-Call out the sample count, output path, and final zero-based pass. The file is a
-44.1 kHz mono 16-bit PCM WAV.
-
-### 4. Play externally (1 minute)
-
-On macOS:
-
-```bash
-afplay maestro-demo.wav
-```
-
-Use a local WAV player on other platforms. Do not use `--play`: it is accepted
-by the current CLI but only reports that playback is not available yet. External
-playback is optional and platform-dependent.
-
-### 5. Prove reproducibility (2 minutes)
-
-```bash
-./build/maestro --mood chiptune --key C --scale major --tempo 120 --seconds 3 --seed 42 --passes 2 --out demo-a.wav
-./build/maestro --mood chiptune --key C --scale major --tempo 120 --seconds 3 --seed 42 --passes 2 --out demo-b.wav
-cmake -E compare_files demo-a.wav demo-b.wav
-```
-
-The fixed seed makes the output bytes repeatable. Changing `--seed` produces a
-different deterministic result.
-
-### 6. Explain Critic feedback (2 minutes)
-
-Critic checks density, simultaneous minor-second/tritone dissonance, and dynamic
-range. With retries remaining, `reduce_density` lowers tempo by 8 BPM (floor 40)
-and `raise_energy` increases it by 8 BPM (ceiling 240). `resolve_dissonance`
-retries without a current parameter adjustment. For `--passes 2`, pass 0 plus up
-to two retries may run, and the program reports the pass that wrote the file.
-
-## Recovery
-
-- For configuration failures, verify CMake 3.16+ and a C++17 compiler, then use
-   the previously prepared build directory.
-- For test failures, show the failure output and use the known-good build; do not
-   improvise source changes during the demonstration.
-- Without audio, show the successful render and deterministic byte comparison.
-   Playback is outside the renderer and varies by platform.
 # DEMO.md — The Live Demo Flow
 
 A tight, repeatable script for demonstrating multi-agent orchestration in VS Code +
@@ -173,15 +15,15 @@ The arc is deliberately shaped around two payoffs:
 ## Before you start (setup — do this off-camera)
 
 - [ ] Repo cloned, `.github/copilot-instructions.md` and all six
-      `.github/chatmodes/*.chatmode.md` present.
-- [ ] Copilot + Copilot Chat extensions signed in; agent mode + custom chat modes
-      available; the chat-mode picker shows all six agents.
+      `.github/agents/*.agent.md` present.
+- [ ] Copilot + Copilot Chat extensions signed in; agent mode + custom agents
+      available; the agent picker shows all six agents.
 - [ ] A terminal open, `cmake` and a C++17 compiler on PATH. Do one throwaway
       `cmake -S . -B build` so the first on-stage build is fast.
 - [ ] Speakers/output tested — you *will* be playing audio.
 - [ ] Have `SPEC.md` open in a tab. It's the star; you'll keep pointing at it.
-- [ ] Optional safety net: a `demo-complete` git branch with the finished code, in
-      case live generation stalls. Never show it unless you need it.
+- [ ] Optional safety net: the `maestro-demo-complete` git branch has the finished
+      code (sources, tests, CMakeLists), in case live generation stalls. Never show it unless you need it.
 
 > **Framing line to open with:** "I'm not going to ask one AI to write a music
 > app. I'm going to run a *team* of agents — a producer and specialists — against a
@@ -204,7 +46,7 @@ The arc is deliberately shaped around two payoffs:
 
 ## Act 1 — The Producer plans (3 min)
 
-1. Switch the chat mode to **@producer**.
+1. Switch the agent to **@producer**.
 2. Prompt: *"Read SPEC.md and give me the ordered build plan with the owning agent
    for each milestone."*
 3. It produces the milestone list (Contracts → Sound → Composer → Synth → Arranger
@@ -316,7 +158,7 @@ This is the climax. Slow down here.
 - **A generation stalls or wanders:** stop it, restate the task with the exact file
   and the acceptance line from `SUBAGENTS.md`. Narrate it as "re-scoping the
   task" — tighter scope is the lesson, not a failure.
-- **Build breaks live:** run `git stash` / checkout the `demo-complete` branch for
+- **Build breaks live:** run `git stash` / checkout the `maestro-demo-complete` branch for
   just that file, say "here's the version this agent produced in rehearsal," and
   keep moving. Don't debug C++ in front of the room.
 - **No audio device:** open the `.wav` in any player already on screen, or fall

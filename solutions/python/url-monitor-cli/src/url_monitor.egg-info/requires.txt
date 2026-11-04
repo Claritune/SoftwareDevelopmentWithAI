@@ -1,5 +1,0 @@
-httpx
-pyyaml
-
-[dev]
-pytest

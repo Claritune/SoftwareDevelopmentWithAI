@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "mem0": {
-      "command": "/Users/bigromanov/.local/bin/uvx",
+      "command": "uvx",
       "args": [
         "--from",
         "git+https://github.com/elvismdev/mem0-mcp-selfhosted.git@v0.3.2",

@@ -20,3 +20,10 @@ __pycache__/
 exercises/cpp/parser_code_review/expr_eval
 exercises/cpp/parser_code_review/tests
 exercises/cpp/parser_code_review_oop/expr_eval
+
+# .NET build artifacts
+bin/
+obj/
+
+# Python packaging artifacts
+*.egg-info/

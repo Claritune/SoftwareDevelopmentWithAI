@@ -75,4 +75,4 @@ steps/step-6-implement-phase2/
 ```
 
 ## QRSPI skills location
-Reference skills: `/Users/bigromanov/Code/ai/SoftwareDevelopmentWithAI/demos/url_monitor_service_reference/docs/skills/`
+Reference skills: `demos/url_monitor_service_reference/docs/skills/` (repo root)
