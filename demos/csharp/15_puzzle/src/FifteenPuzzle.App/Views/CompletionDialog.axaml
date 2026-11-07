@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:automation="using:Avalonia.Automation"
+        x:Class="FifteenPuzzle.App.Views.CompletionDialog"
+        Title="Puzzle Complete"
+        Width="430" Height="280"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}">
+    <Grid RowDefinitions="*,Auto" Margin="28" RowSpacing="24">
+        <StackPanel Spacing="16">
+            <TextBlock Text="Puzzle complete" FontSize="28" FontWeight="Bold"
+                       automation:AutomationProperties.Name="Puzzle complete" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Border Classes="stat"><StackPanel>
+                    <TextBlock Text="TIME" Classes="statLabel" />
+                    <TextBlock x:Name="TimeText" Classes="statValue" />
+                </StackPanel></Border>
+                <Border Grid.Column="1" Classes="stat"><StackPanel>
+                    <TextBlock Text="MOVES" Classes="statLabel" />
+                    <TextBlock x:Name="MovesText" Classes="statValue" />
+                </StackPanel></Border>
+            </Grid>
+        </StackPanel>
+        <Button x:Name="DoneButton" Grid.Row="1" Content="Done"
+                HorizontalAlignment="Right" Classes="primary" IsDefault="True"
+                automation:AutomationProperties.Name="Close completion result" />
+    </Grid>
+</Window>

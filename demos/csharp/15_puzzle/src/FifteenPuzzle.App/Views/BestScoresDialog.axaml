@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FifteenPuzzle.App.ViewModels"
+        xmlns:automation="using:Avalonia.Automation"
+        x:Class="FifteenPuzzle.App.Views.BestScoresDialog"
+        x:DataType="vm:BestScoresViewModel"
+        Title="Best Scores"
+        Width="720" Height="620" MinWidth="620" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="28" RowSpacing="20">
+        <TextBlock Text="Best Scores" FontSize="30" FontWeight="Bold" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="18">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Fastest Times" FontSize="18" FontWeight="SemiBold" />
+                <TextBlock Text="No completed puzzles yet." IsVisible="{Binding !HasFastestTimes}"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <ItemsControl ItemsSource="{Binding FastestTimes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ScoreRowViewModel">
+                            <Grid ColumnDefinitions="32,70,55,*" Margin="0,7">
+                                <TextBlock Text="{Binding Rank}" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Time}" FontWeight="SemiBold" />
+                                <TextBlock Grid.Column="2" Text="{Binding Moves}" />
+                                <TextBlock Grid.Column="3" Text="{Binding Date}" HorizontalAlignment="Right" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="10">
+                <TextBlock Text="Fewest Moves" FontSize="18" FontWeight="SemiBold" />
+                <TextBlock Text="No completed puzzles yet." IsVisible="{Binding !HasFewestMoves}"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <ItemsControl ItemsSource="{Binding FewestMoves}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ScoreRowViewModel">
+                            <Grid ColumnDefinitions="32,55,70,*" Margin="0,7">
+                                <TextBlock Text="{Binding Rank}" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Moves}" FontWeight="SemiBold" />
+                                <TextBlock Grid.Column="2" Text="{Binding Time}" />
+                                <TextBlock Grid.Column="3" Text="{Binding Date}" HorizontalAlignment="Right" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+        <Button x:Name="CloseButton" Grid.Row="2" Content="Close"
+                HorizontalAlignment="Right" Classes="primary" IsDefault="True" IsCancel="True"
+                automation:AutomationProperties.Name="Close best scores" />
+    </Grid>
+</Window>

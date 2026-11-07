@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:automation="using:Avalonia.Automation"
+        x:Class="FifteenPuzzle.App.Views.NewGameDialog"
+        Title="Start New Game"
+        Width="430" Height="230"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}">
+    <Grid RowDefinitions="*,Auto" Margin="28" RowSpacing="24">
+        <StackPanel Spacing="10">
+            <TextBlock Text="Replace this puzzle?" FontSize="24" FontWeight="Bold" />
+            <TextBlock Text="Your current board, moves, and elapsed time will be discarded."
+                       TextWrapping="Wrap" Foreground="{DynamicResource MutedTextBrush}" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button x:Name="CancelButton" Content="Cancel" Classes="secondary"
+                    IsDefault="True" IsCancel="True"
+                    automation:AutomationProperties.Name="Cancel new game" />
+            <Button x:Name="ContinueButton" Content="Continue" Classes="primary"
+                    automation:AutomationProperties.Name="Continue with new game" />
+        </StackPanel>
+    </Grid>
+</Window>

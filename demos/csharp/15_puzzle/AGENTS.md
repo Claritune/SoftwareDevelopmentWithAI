@@ -1,0 +1,1 @@
+All function names should be in capital letters only and start with F_

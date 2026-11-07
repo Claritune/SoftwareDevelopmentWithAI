@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FifteenPuzzle.App.ViewModels"
+        xmlns:automation="using:Avalonia.Automation"
+        x:Class="FifteenPuzzle.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="15 Puzzle"
+        Width="586" Height="764"
+        MinWidth="500" MinHeight="680"
+        Background="{DynamicResource AppBackgroundBrush}">
+    <Border Margin="22,20,22,0" Padding="27,28,27,8"
+            Background="{DynamicResource PanelBrush}"
+            BorderBrush="{DynamicResource PanelLineBrush}"
+            BorderThickness="1" CornerRadius="26,26,0,0">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="16">
+            <TextBlock Text="15 Puzzle" Classes="title"
+                       HorizontalAlignment="Center" />
+
+            <TextBlock Grid.Row="1"
+                       Text="Slide the numbered tiles into order, ending with the empty space in the bottom right."
+                       Classes="subtitle" TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis" />
+
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto">
+                <Border Classes="movePill">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Moves" Classes="moveLabel" />
+                        <TextBlock Text="{Binding MoveCount}" Classes="moveValue"
+                                   automation:AutomationProperties.Name="Move count" />
+                    </StackPanel>
+                </Border>
+                <Button Grid.Column="2" Content="New Game"
+                        Command="{Binding NewGameCommand}"
+                        automation:AutomationProperties.Name="Start a new game"
+                        Classes="primary" />
+            </Grid>
+
+            <Grid Grid.Row="3" ColumnDefinitions="*,Auto,*">
+                <TextBlock Grid.Column="1" Text="{Binding StatusAnnouncement}"
+                           Classes="status"
+                           automation:AutomationProperties.Name="Game status" />
+                <Button Grid.Column="2" Content="Best Scores"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ShowBestScoresCommand}"
+                        automation:AutomationProperties.Name="Show best scores"
+                        Classes="scoreLink" />
+            </Grid>
+
+            <Border Grid.Row="4" Classes="helpStrip">
+                <TextBlock Text="How to play: click a tile next to the empty space, or use the arrow keys."
+                           TextTrimming="CharacterEllipsis" />
+            </Border>
+
+            <Viewbox Grid.Row="5" Stretch="Uniform"
+                     HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Border Width="450" Height="450" Classes="board">
+                    <ItemsControl ItemsSource="{Binding Tiles}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="4" Columns="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TileViewModel">
+                                <Button Content="{Binding DisplayText}"
+                                        Command="{Binding $parent[Window].DataContext.MoveTileCommand}"
+                                        CommandParameter="{Binding Number}"
+                                        IsEnabled="{Binding CanMove}"
+                                        Classes.movable="{Binding CanMove}"
+                                        Classes.empty="{Binding IsEmpty}"
+                                        automation:AutomationProperties.Name="{Binding AccessibleName}"
+                                        Classes="tile" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </Viewbox>
+        </Grid>
+    </Border>
+</Window>

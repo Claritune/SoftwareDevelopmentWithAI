@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FifteenPuzzle.App/FifteenPuzzle.App.csproj" />
+    <Project Path="src/FifteenPuzzle.Core/FifteenPuzzle.Core.csproj" />
+    <Project Path="src/FifteenPuzzle.Infrastructure/FifteenPuzzle.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FifteenPuzzle.Core.Tests/FifteenPuzzle.Core.Tests.csproj" />
+    <Project Path="tests/FifteenPuzzle.Infrastructure.Tests/FifteenPuzzle.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
