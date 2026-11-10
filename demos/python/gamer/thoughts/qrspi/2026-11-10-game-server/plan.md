@@ -730,7 +730,7 @@ Add these tests:
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest -q` passes
+- [x] `uv run pytest -q` passes
 
 #### Manual
 - [ ] Using two tabs as in Phase 2, black's four legal squares are highlighted. Clicking one flips the disc, and within about 1s white's tab shows the move with white's legal squares highlighted.

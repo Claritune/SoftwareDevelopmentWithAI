@@ -71,6 +71,18 @@ class Session:
         self.version += 1
         return seat, token
 
+    def move(self, token: str | None, raw_move: dict[str, Any], version: int) -> None:
+        seat = self.seat_for(token)
+        if seat is None:
+            raise BadToken()
+        if version != self.version:
+            raise StaleVersion()
+        if self.lifecycle != "playing" or self.game.status(self.state).to_move != seat:
+            raise NotYourTurn()
+        move = self.game.parse_move(raw_move)                     # may raise IllegalMove
+        self.state = self.game.apply_move(self.state, seat, move)  # may raise IllegalMove
+        self.version += 1
+
 
 class SessionManager:
     def __init__(self, registry: dict[str, Game]) -> None:

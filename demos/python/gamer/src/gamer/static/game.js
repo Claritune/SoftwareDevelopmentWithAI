@@ -3,7 +3,7 @@ import { api, getToken, setToken, poll } from "/static/common.js";
 const [, , gameId, , sessionId] = location.pathname.split("/");
 const el = (id) => document.getElementById(id);
 let token = getToken(sessionId);
-let view, lastVersion = null;
+let view, current, lastVersion = null;
 
 el("lobby").href = `/games/${gameId}`;
 el("title").textContent = `Game ${sessionId}`;
@@ -27,10 +27,19 @@ function statusText(s) {
 }
 
 function show(s) {
+  current = s;
   if (s.version === lastVersion) return;
   lastVersion = s.version;
-  view.render(el("board"), s.public_state, s.legal_moves, null);   // Phase 3 passes onMove
+  view.render(el("board"), s.public_state, s.legal_moves, s.your_seat ? onMove : null);
   el("status").textContent = statusText(s);
+}
+
+async function onMove(move) {
+  try {
+    show(await api(`/api/sessions/${sessionId}/moves`,
+      { method: "POST", token, body: { move, version: current.version } }));
+    el("error").textContent = "";
+  } catch (e) { el("error").textContent = e.message; }   // next poll re-syncs
 }
 
 async function main() {

@@ -10,6 +10,34 @@ Board = tuple[tuple[str, ...], ...]
 Move = tuple[int, int]  # (row, col), 0-based, row 0 at the top
 
 
+DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+
+def _opponent(seat: Seat) -> Seat:
+    return WHITE if seat == BLACK else BLACK
+
+
+def _on_board(r: int, c: int) -> bool:
+    return 0 <= r < SIZE and 0 <= c < SIZE
+
+
+def _flips(board: Board, seat: Seat, row: int, col: int) -> list[Move]:
+    if board[row][col] != EMPTY:
+        return []
+    flips: list[Move] = []
+    for dr, dc in DIRECTIONS:
+        line, r, c = [], row + dr, col + dc
+        while _on_board(r, c) and board[r][c] == _opponent(seat):
+            line.append((r, c)); r += dr; c += dc
+        if line and _on_board(r, c) and board[r][c] == seat:
+            flips.extend(line)
+    return flips
+
+
+def _moves(board: Board, seat: Seat) -> list[Move]:
+    return [(r, c) for r in range(SIZE) for c in range(SIZE) if _flips(board, seat, r, c)]
+
+
 @dataclass(frozen=True)
 class OthelloState:
     board: Board
@@ -35,11 +63,36 @@ class Othello:
     def to_public(self, state: OthelloState) -> dict[str, Any]:
         return {"board": [list(row) for row in state.board]}
 
-    # Phase 3 replaces these stubs.
-    def legal_moves(self, state, seat): return []
-    def apply_move(self, state, seat, move): raise IllegalMove("moves not implemented yet")
-    def parse_move(self, raw): raise IllegalMove("moves not implemented yet")
-    def move_to_public(self, move): return {"row": move[0], "col": move[1]}
+    def legal_moves(self, state: OthelloState, seat: Seat) -> list[Move]:
+        return _moves(state.board, seat) if state.to_move == seat else []
+
+    def apply_move(self, state: OthelloState, seat: Seat, move: Move) -> OthelloState:
+        if state.to_move != seat:
+            raise IllegalMove("not your turn")
+        row, col = move
+        flips = _flips(state.board, seat, row, col)
+        if not flips:
+            raise IllegalMove("move must flip at least one disc")
+        rows = [list(r) for r in state.board]
+        for r, c in [(row, col), *flips]:
+            rows[r][c] = seat
+        board = tuple(map(tuple, rows))
+        if _moves(board, _opponent(seat)):
+            to_move = _opponent(seat)
+        elif _moves(board, seat):
+            to_move = seat                    # opponent must pass
+        else:
+            to_move = None                    # neither side can move
+        return OthelloState(board, to_move)
+
+    def parse_move(self, raw: dict[str, Any]) -> Move:
+        row, col = raw.get("row"), raw.get("col")
+        if not all(type(v) is int for v in (row, col)) or not (_on_board(row, col)):
+            raise IllegalMove("move must be {row, col} with integers 0-7")
+        return (row, col)
+
+    def move_to_public(self, move: Move) -> dict[str, Any]:
+        return {"row": move[0], "col": move[1]}
 
 
 OTHELLO = Othello()

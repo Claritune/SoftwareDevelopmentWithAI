@@ -36,3 +36,8 @@ class SessionState(BaseModel):
     legal_moves: list[dict[str, Any]]
     seats: dict[str, bool]  # seat -> taken
     your_seat: str | None
+
+
+class MoveRequest(BaseModel):
+    move: dict[str, Any]
+    version: int

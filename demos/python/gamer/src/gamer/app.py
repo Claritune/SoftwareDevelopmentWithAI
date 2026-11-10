@@ -6,22 +6,32 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from gamer.games import REGISTRY
-from gamer.games.base import Game, Seat
-from gamer.protocol import GameInfo, SeatAssignment, SessionState, SessionSummary, StatusModel
+from gamer.games.base import Game, IllegalMove, Seat
+from gamer.protocol import (
+    GameInfo,
+    MoveRequest,
+    SeatAssignment,
+    SessionState,
+    SessionSummary,
+    StatusModel,
+)
 from gamer.sessions import (
     BadToken,
     GameNotFound,
+    NotYourTurn,
     Session,
     SessionError,
     SessionFull,
     SessionManager,
     SessionNotFound,
+    StaleVersion,
 )
 
 STATIC_DIR = Path(__file__).parent / "static"
 
 ERROR_STATUS: dict[type[Exception], int] = {
     GameNotFound: 404, SessionNotFound: 404, BadToken: 403, SessionFull: 409,
+    StaleVersion: 409, NotYourTurn: 409,
 }
 
 
@@ -47,6 +57,10 @@ def create_app(registry: dict[str, Game] = REGISTRY) -> FastAPI:
     async def session_error(_, exc: SessionError) -> JSONResponse:
         status = next(c for t, c in ERROR_STATUS.items() if isinstance(exc, t))
         return JSONResponse({"detail": str(exc)}, status_code=status)
+
+    @app.exception_handler(IllegalMove)
+    async def illegal_move(_, exc: IllegalMove) -> JSONResponse:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
 
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     for game in registry.values():
@@ -81,6 +95,13 @@ def create_app(registry: dict[str, Game] = REGISTRY) -> FastAPI:
         if x_player_token and seat is None:
             raise BadToken()
         return build_state(session, seat)
+
+    @app.post("/api/sessions/{session_id}/moves")
+    async def make_move(session_id: str, body: MoveRequest,
+                        x_player_token: str | None = Header(default=None)) -> SessionState:
+        session = manager.get(session_id)
+        session.move(x_player_token, body.move, body.version)
+        return build_state(session, session.seat_for(x_player_token))
 
     @app.get("/", include_in_schema=False)
     async def index_page() -> FileResponse:
