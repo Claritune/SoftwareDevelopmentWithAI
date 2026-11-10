@@ -65,6 +65,9 @@ def test_flips_in_all_eight_directions():
     assert after.board[4][4] == BLACK
     assert all(cell != WHITE for row in after.board for cell in row)
     assert OTHELLO.status(after).scores == {"black": 17, "white": 0}
+    # Neither side can move, but the board isn't full: the game ends early.
+    assert OTHELLO.status(after).finished
+    assert OTHELLO.status(after).winner == "black"
 
 
 def test_multi_disc_flip():
@@ -115,3 +118,27 @@ def test_forced_pass_keeps_turn():
     after = OTHELLO.apply_move(state, "black", (0, 2))
     assert OTHELLO.legal_moves(OthelloState(after.board, "white"), "white") == []
     assert after.to_move == "black"
+
+
+def test_board_filled_finish():
+    state = state_from(["BBBBBBBB"] * 7 + ["BBBBBBW."])
+    after = OTHELLO.apply_move(state, "black", (7, 7))
+    assert after.to_move is None
+    status = OTHELLO.status(after)
+    assert status.finished
+    assert status.winner == "black"
+    assert status.scores == {"black": 64, "white": 0}
+
+
+def test_draw():
+    state = state_from(["BBWW...."] + [EMPTY_ROW] * 7, to_move=None)
+    status = OTHELLO.status(state)
+    assert status.finished
+    assert status.winner is None
+    assert status.scores == {"black": 2, "white": 2}
+
+
+def test_initial_state_not_finished():
+    status = OTHELLO.status(OTHELLO.initial_state())
+    assert status.finished is False
+    assert status.winner is None

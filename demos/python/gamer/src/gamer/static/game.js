@@ -3,7 +3,7 @@ import { api, getToken, setToken, poll } from "/static/common.js";
 const [, , gameId, , sessionId] = location.pathname.split("/");
 const el = (id) => document.getElementById(id);
 let token = getToken(sessionId);
-let view, current, lastVersion = null;
+let view, current, stop, lastVersion = null;
 
 el("lobby").href = `/games/${gameId}`;
 el("title").textContent = `Game ${sessionId}`;
@@ -20,6 +20,7 @@ async function ensureSeat() {
 
 function statusText(s) {
   const scores = Object.entries(s.status.scores).map(([k, v]) => `${k} ${v}`).join(" · ");
+  if (s.lifecycle === "finished") return s.status.winner ? `${s.status.winner} wins · ${scores}` : `Draw · ${scores}`;
   if (s.your_seat === null) return `Session full, watching only · ${scores}`;
   if (s.lifecycle === "waiting") return `You are ${s.your_seat}. Waiting for opponent…`;
   const turn = s.status.to_move === s.your_seat ? "Your turn" : "Opponent's turn";
@@ -32,6 +33,7 @@ function show(s) {
   lastVersion = s.version;
   view.render(el("board"), s.public_state, s.legal_moves, s.your_seat ? onMove : null);
   el("status").textContent = statusText(s);
+  if (s.lifecycle === "finished") stop?.();
 }
 
 async function onMove(move) {
@@ -53,7 +55,7 @@ async function main() {
   } catch (e) {
     el("error").textContent = e.status === 404 ? "Session not found." : e.message; return;
   }
-  poll(async () => {
+  stop = poll(async () => {
     try {
       show(await api(`/api/sessions/${sessionId}/state`, { token }));
       el("error").textContent = "";

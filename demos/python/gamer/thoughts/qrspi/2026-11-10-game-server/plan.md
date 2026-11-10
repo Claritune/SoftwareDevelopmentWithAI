@@ -853,7 +853,7 @@ Picking the first legal move every turn makes the game deterministic.
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest -q` passes, covering all test files above
+- [x] `uv run pytest -q` passes, covering all test files above
 
 #### Manual
 - [ ] Play a full Othello game in two tabs. Both tabs show "black wins · …", "white wins · …" or "Draw · …" when it ends.

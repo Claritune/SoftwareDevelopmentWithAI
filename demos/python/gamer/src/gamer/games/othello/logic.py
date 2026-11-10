@@ -58,7 +58,11 @@ class Othello:
 
     def status(self, state: OthelloState) -> GameStatus:
         scores = {s: sum(row.count(s) for row in state.board) for s in self.seats}
-        return GameStatus(to_move=state.to_move, finished=False, winner=None, scores=scores)
+        finished = state.to_move is None
+        winner = None
+        if finished and scores[BLACK] != scores[WHITE]:
+            winner = max(scores, key=scores.get)
+        return GameStatus(to_move=state.to_move, finished=finished, winner=winner, scores=scores)
 
     def to_public(self, state: OthelloState) -> dict[str, Any]:
         return {"board": [list(row) for row in state.board]}
