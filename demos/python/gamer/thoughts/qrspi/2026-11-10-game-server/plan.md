@@ -571,7 +571,7 @@ Because `pythonpath = ["tests"]` is set, test files use
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest -q` passes
+- [x] `uv run pytest -q` passes
 
 #### Manual
 - [ ] `uv run gamer`. In tab A, `/` → Othello → **Create game**. The page shows "You are black. Waiting for opponent…" and the starting board.
