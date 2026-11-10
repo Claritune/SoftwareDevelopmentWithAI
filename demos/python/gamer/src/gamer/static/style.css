@@ -1,0 +1,39 @@
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0;
+  color: #222;
+  background: #fafafa;
+}
+
+.container {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.status {
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.error {
+  color: #c00;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #eee;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
