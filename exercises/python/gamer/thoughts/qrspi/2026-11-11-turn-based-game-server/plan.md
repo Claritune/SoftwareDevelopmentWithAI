@@ -853,11 +853,11 @@ export function render(container, state, { mySeat, onMove }) {
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest` passes
-- [ ] `uv run pytest tests/games/test_othello.py tests/test_sessions.py` passes
-- [ ] `uv run ruff check && uv run ruff format --check` passes
-- [ ] `rg -n -i othello src/gamer/app.py src/gamer/sessions.py src/gamer/protocol.py` prints nothing
-- [ ] `rg -n "fastapi|pydantic|asyncio" src/gamer/games` prints nothing
+- [x] `uv run pytest` passes
+- [x] `uv run pytest tests/games/test_othello.py tests/test_sessions.py` passes
+- [x] `uv run ruff check && uv run ruff format --check` passes
+- [x] `rg -n -i othello src/gamer/app.py src/gamer/sessions.py src/gamer/protocol.py` prints nothing
+- [x] `rg -n "fastapi|pydantic|asyncio" src/gamer/games` prints nothing
 
 #### Manual
 - [ ] `uv run gamer`. In tab A, open `http://127.0.0.1:8000/#/othello`, enter "Ann", and click Create. The URL becomes `#/othello/XXXXXX`, a share link is shown, and the status says "Waiting for opponent…".

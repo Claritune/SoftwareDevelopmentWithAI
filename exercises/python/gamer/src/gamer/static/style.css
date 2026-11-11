@@ -39,3 +39,66 @@ main {
 .error {
   color: #c53030;
 }
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+form .error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+input,
+button {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+}
+
+.othello-board {
+  display: inline-grid;
+  grid-template-columns: repeat(8, 48px);
+  gap: 2px;
+  padding: 4px;
+  background: #1f4d2b;
+}
+
+.sq {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: #2f7a43;
+  cursor: default;
+}
+
+.sq:disabled {
+  opacity: 1;
+}
+
+.sq.legal {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 3px #f6e05e;
+}
+
+.disc {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+}
+
+.disc.black {
+  background: #111;
+}
+
+.disc.white {
+  background: #f7f7f7;
+}

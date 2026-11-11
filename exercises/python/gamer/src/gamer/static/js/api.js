@@ -23,3 +23,8 @@ async function request(method, path, body) {
 }
 
 export const listGames = () => request("GET", "/api/games");
+export const createSession = (gameId, name) =>
+  request("POST", `/api/games/${gameId}/sessions`, env("create", { name }));
+export const joinSession = (code, name) =>
+  request("POST", `/api/sessions/${code}/join`, env("join", { name }));
+export const getSession = (code) => request("GET", `/api/sessions/${code}`);
