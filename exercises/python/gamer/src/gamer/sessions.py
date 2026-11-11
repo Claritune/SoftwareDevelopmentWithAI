@@ -81,6 +81,11 @@ class SessionRegistry:
         _, seat = session.join(name)
         return session, seat
 
+    def open_sessions(self, game_id: str) -> list[Session]:
+        return [
+            s for s in self._sessions.values() if s.game.id == game_id and s.status == "waiting"
+        ]
+
     def get(self, code: str) -> Session:
         session = self._sessions.get(code.upper())
         if session is None:

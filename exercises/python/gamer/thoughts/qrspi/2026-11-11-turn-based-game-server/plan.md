@@ -939,8 +939,8 @@ async () => {
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest` passes
-- [ ] `uv run ruff check && uv run ruff format --check` passes
+- [x] `uv run pytest` passes
+- [x] `uv run ruff check && uv run ruff format --check` passes
 
 #### Manual
 - [ ] `uv run gamer`. Tab A creates as "Ann" from `#/othello`. Tab B, already on `#/othello`, shows "XXXXXX — Ann" within about 1 s.

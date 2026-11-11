@@ -100,14 +100,72 @@ async function showDirectory(token) {
 }
 
 function showLobby(gameId, token) {
-  view.replaceChildren(
-    el("h1", {}, gameId),
-    nameForm("Create session", async (name) => {
+  const nameInput = el("input", { id: "name", maxlength: "32", placeholder: "Your name" });
+  const errorEl = el("p", { class: "error", id: "lobby-error" });
+  const list = el("ul", { id: "sessions" });
+
+  const requireName = () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      errorEl.textContent = "Enter your name";
+      return null;
+    }
+    errorEl.textContent = "";
+    return name;
+  };
+
+  const create = async () => {
+    const name = requireName();
+    if (!name) return;
+    try {
       const joined = await api.createSession(gameId, name);
       seats.set(joined.code, { playerId: joined.player_id, seat: joined.seat });
       if (token === routeToken) location.hash = `#/${gameId}/${joined.code}`;
-    }),
+    } catch (e) {
+      errorEl.textContent = e.message;
+    }
+  };
+
+  const joinRow = ({ code, players }) => el("li", {},
+    `${code} — ${players.map((p) => p.name).join(", ")} `,
+    el("button", {
+      type: "button",
+      onclick: async () => {
+        const name = requireName();
+        if (!name) return;
+        try {
+          const joined = await api.joinSession(code, name);
+          seats.set(code, { playerId: joined.player_id, seat: joined.seat });
+          location.hash = `#/${gameId}/${code}`;
+        } catch (e) {
+          errorEl.textContent = e.status === 409 ? "Session full" : e.message;
+        }
+      },
+    }, "Join"),
   );
+
+  const renderRows = (sessions) => {
+    list.replaceChildren(...(sessions.length
+      ? sessions.map(joinRow)
+      : [el("li", {}, "No open sessions")]));
+  };
+
+  view.replaceChildren(
+    el("h1", {}, gameId),
+    el("div", { class: "lobby-controls" },
+      nameInput,
+      el("button", { type: "button", onclick: create }, "Create session")),
+    el("h2", {}, "Open sessions"),
+    list,
+    errorEl,
+  );
+
+  stopPolling = poll(async () => {
+    const sessions = await api.listSessions(gameId);
+    if (token !== routeToken) return false;
+    renderRows(sessions);
+    return true;
+  });
 }
 
 async function showGame(gameId, code, token) {

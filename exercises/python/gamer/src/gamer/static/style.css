@@ -59,6 +59,16 @@ button {
   padding: 0.4rem 0.6rem;
 }
 
+.lobby-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+#sessions li {
+  padding: 0.3rem 0;
+}
+
 .othello-board {
   display: inline-grid;
   grid-template-columns: repeat(8, 48px);

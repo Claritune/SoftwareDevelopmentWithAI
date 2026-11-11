@@ -111,3 +111,20 @@ async def test_create_othello_session(client):
     state = (await create(client, "othello"))["state"]
     assert len(state["legal_moves"]) == 4
     assert len(state["board"]) == 8
+
+
+async def test_lobby_lists_waiting_sessions(fake_client):
+    a = (await create(fake_client, name="Ann"))["code"]
+    b = (await create(fake_client, name="Cat"))["code"]
+    await join(fake_client, b, "Bob")
+    r = await fake_client.get("/api/games/fake/sessions")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["type"] == "sessions"
+    assert body["payload"] == [{"code": a, "players": [{"seat": 0, "name": "Ann"}]}]
+
+
+async def test_lobby_unknown_game_404(fake_client):
+    r = await fake_client.get("/api/games/nope/sessions")
+    assert r.status_code == 404
+    assert r.json()["payload"]["code"] == "game_not_found"

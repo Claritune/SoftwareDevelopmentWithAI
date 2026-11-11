@@ -71,6 +71,20 @@ def create_app(
             ],
         )
 
+    @app.get("/api/games/{game_id}/sessions")
+    async def list_sessions(game_id: str) -> dict:
+        get_game(game_id)
+        return envelope(
+            "sessions",
+            [
+                {
+                    "code": s.code,
+                    "players": [{"seat": i, "name": p.name} for i, p in enumerate(s.seats)],
+                }
+                for s in registry.open_sessions(game_id)
+            ],
+        )
+
     @app.post("/api/games/{game_id}/sessions")
     async def create_session(game_id: str, body: NameRequest) -> dict:
         session, seat = registry.create(get_game(game_id), body.payload.name)

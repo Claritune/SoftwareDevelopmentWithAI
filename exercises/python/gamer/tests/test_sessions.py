@@ -78,3 +78,14 @@ def test_payload_hides_player_ids():
     text = json.dumps(payload)
     assert ann.player_id not in text
     assert bob.player_id not in text
+
+
+def test_open_sessions_filters():
+    registry = SessionRegistry()
+    fake, other = FakeGame("fake"), FakeGame("other")
+    s1, _ = registry.create(fake, "Ann")
+    s2, _ = registry.create(fake, "Cat")
+    s3, _ = registry.create(other, "Dan")
+    s2.join("Bob")
+    assert registry.open_sessions("fake") == [s1]
+    assert registry.open_sessions("other") == [s3]
