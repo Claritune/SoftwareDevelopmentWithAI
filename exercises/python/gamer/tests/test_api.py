@@ -128,3 +128,104 @@ async def test_lobby_unknown_game_404(fake_client):
     r = await fake_client.get("/api/games/nope/sessions")
     assert r.status_code == 404
     assert r.json()["payload"]["code"] == "game_not_found"
+
+
+async def start(c, game_id) -> tuple[str, dict[int, str], dict]:
+    created = await create(c, game_id, "Ann")
+    r = await join(c, created["code"], "Bob")
+    assert r.status_code == 200
+    joined = r.json()["payload"]
+    return created["code"], {0: created["player_id"], 1: joined["player_id"]}, joined["state"]
+
+
+async def move(c, code, player_id, mv, v=1):
+    body = {"v": v, "type": "move", "payload": {"player_id": player_id, "move": mv}}
+    return await c.post(f"/api/sessions/{code}/moves", json=body)
+
+
+async def play_out(c, code, ids, state) -> dict:
+    for _ in range(100):
+        if state["status"] == "finished":
+            break
+        r = await move(c, code, ids[state["current_player"]], state["legal_moves"][0])
+        assert r.status_code == 200, r.text
+        state = r.json()["payload"]
+    return state
+
+
+async def test_two_players_finish_othello(client):
+    code, ids, state = await start(client, "othello")
+    state = await play_out(client, code, ids, state)
+    assert state["status"] == "finished"
+    assert state["winner"] in (0, 1, None)
+    assert sum(state["scores"]) <= 64
+
+
+async def test_fake_game_finishes_via_api(fake_client):
+    code, ids, state = await start(fake_client, "fake")
+    state = await play_out(fake_client, code, ids, state)
+    assert state["status"] == "finished"
+    assert state["version"] == 5
+
+
+async def test_poll_sees_move(fake_client):
+    code, ids, _ = await start(fake_client, "fake")
+    r = await move(fake_client, code, ids[0], {"step": 1})
+    assert r.status_code == 200
+    r = await fake_client.get(f"/api/sessions/{code}")
+    state = r.json()["payload"]
+    assert state["version"] == 3
+    assert state["current_player"] == 1
+
+
+@pytest.mark.parametrize(
+    "case, status, error_code",
+    [
+        ("wrong-seat", 409, "illegal_move"),
+        ("bad-move", 400, "invalid_move"),
+        ("unknown-player", 403, "unknown_player"),
+        ("wrong-v", 400, "bad_request"),
+        ("unknown-code", 404, "session_not_found"),
+    ],
+)
+async def test_move_errors(fake_client, case, status, error_code):
+    code, ids, _ = await start(fake_client, "fake")
+    pid, mv, v = ids[0], {"step": 1}, 1
+    if case == "wrong-seat":
+        pid = ids[1]
+    elif case == "bad-move":
+        mv = {"step": 2}
+    elif case == "unknown-player":
+        pid = "nope"
+    elif case == "wrong-v":
+        v = 2
+    elif case == "unknown-code":
+        code = "ZZZZZZ"
+    r = await move(fake_client, code, pid, mv, v)
+    assert r.status_code == status
+    body = r.json()
+    assert body["type"] == "error"
+    assert body["payload"]["code"] == error_code
+
+
+async def test_move_before_join_409(fake_client):
+    created = await create(fake_client)
+    r = await move(fake_client, created["code"], created["player_id"], {"step": 1})
+    assert r.status_code == 409
+    assert r.json()["payload"]["code"] == "game_not_started"
+
+
+async def test_move_after_finish_409(fake_client):
+    code, ids, state = await start(fake_client, "fake")
+    await play_out(fake_client, code, ids, state)
+    r = await move(fake_client, code, ids[1], {"step": 1})
+    assert r.status_code == 409
+    assert r.json()["payload"]["code"] == "illegal_move"
+
+
+async def test_join_finished_session_409(fake_client):
+    code, ids, state = await start(fake_client, "fake")
+    await play_out(fake_client, code, ids, state)
+    r = await join(fake_client, code, "Cat")
+    assert r.status_code == 409
+    assert r.json()["payload"]["code"] == "session_full"

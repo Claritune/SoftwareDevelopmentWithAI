@@ -39,3 +39,14 @@ class NameRequest(BaseModel):
     v: Literal[1]
     type: str
     payload: NamePayload
+
+
+class MovePayload(BaseModel):
+    player_id: str
+    move: Any  # game-specific; parsed by Game.parse_move, never coerced here
+
+
+class MoveRequest(BaseModel):
+    v: Literal[1]
+    type: str
+    payload: MovePayload

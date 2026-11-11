@@ -59,6 +59,14 @@ button {
   padding: 0.4rem 0.6rem;
 }
 
+.result {
+  padding: 0.6rem 0.8rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  background: #fefcbf;
+  border-radius: 4px;
+}
+
 .lobby-controls {
   display: flex;
   gap: 0.5rem;

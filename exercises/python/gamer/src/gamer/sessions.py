@@ -24,6 +24,16 @@ class SessionFull(ApiError):
         super().__init__(409, "session_full", f"Session {code} is full")
 
 
+class UnknownPlayer(ApiError):
+    def __init__(self) -> None:
+        super().__init__(403, "unknown_player", "Unknown player_id for this session")
+
+
+class GameNotStarted(ApiError):
+    def __init__(self, code: str) -> None:
+        super().__init__(409, "game_not_started", f"Session {code} is waiting for players")
+
+
 @dataclass(frozen=True)
 class Seat:
     player_id: str
@@ -54,6 +64,16 @@ class Session:
         self.seats.append(seat)
         self.version += 1
         return len(self.seats) - 1, seat
+
+    def move(self, player_id: str, payload: Any) -> None:
+        seat = next((i for i, s in enumerate(self.seats) if s.player_id == player_id), None)
+        if seat is None:
+            raise UnknownPlayer()
+        if len(self.seats) < self.game.max_players:
+            raise GameNotStarted(self.code)
+        move = self.game.parse_move(payload)
+        self.state = self.game.apply_move(self.state, seat, move)
+        self.version += 1
 
     def to_payload(self) -> dict[str, Any]:
         snapshot = self.game.snapshot(self.state)

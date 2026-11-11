@@ -186,18 +186,34 @@ async function showGame(gameId, code, token) {
   const renderer = await import(`/games/${gameId}.js`);
   if (token !== routeToken) return;
   const status = el("p", { id: "status" });
+  const result = el("div", { id: "result" });
   const board = el("div", { id: "board" });
   const error = el("p", { class: "error" });
   const link = `${location.origin}/#/${gameId}/${code}`;
   view.replaceChildren(el("h1", {}, `Session ${code}`),
-    el("p", {}, "Share: ", el("a", { href: link }, link)), status, board, error);
+    el("p", {}, "Share: ", el("a", { href: link }, link)), status, result, board, error);
 
   let lastVersion = -1;
-  const onMove = () => {};
+  let sending = false;
+  const onMove = async (move) => {
+    if (sending) return;
+    sending = true;
+    error.textContent = "";
+    try {
+      show(await api.makeMove(code, mine.playerId, move));
+    } catch (e) {
+      error.textContent = e.message;
+    } finally {
+      sending = false;
+    }
+  };
   const show = (state) => {
     if (state.version === lastVersion) return;
     lastVersion = state.version;
     status.textContent = describe(state, mine.seat);
+    result.replaceChildren(...(state.status === "finished"
+      ? [el("p", { class: "result" }, describe(state, mine.seat))]
+      : []));
     renderer.render(board, state, { mySeat: mine.seat, onMove });
   };
   stopPolling = poll(async () => {

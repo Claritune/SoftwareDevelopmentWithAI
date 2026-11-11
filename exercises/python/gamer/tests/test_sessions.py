@@ -3,11 +3,14 @@ import json
 import pytest
 from fakes import FakeGame
 
+from gamer.games.base import IllegalMove
 from gamer.sessions import (
     CODE_ALPHABET,
+    GameNotStarted,
     SessionFull,
     SessionNotFound,
     SessionRegistry,
+    UnknownPlayer,
     new_code,
 )
 
@@ -89,3 +92,36 @@ def test_open_sessions_filters():
     s2.join("Bob")
     assert registry.open_sessions("fake") == [s1]
     assert registry.open_sessions("other") == [s3]
+
+
+def test_move_unknown_player():
+    _, session, _, _ = make_full()
+    with pytest.raises(UnknownPlayer):
+        session.move("nope", {"step": 1})
+
+
+def test_move_before_start():
+    session, ann = SessionRegistry().create(FakeGame(), "Ann")
+    with pytest.raises(GameNotStarted):
+        session.move(ann.player_id, {"step": 1})
+
+
+def test_move_bumps_version():
+    _, session, ann, bob = make_full()
+    assert session.version == 2
+    before = session.state
+    with pytest.raises(IllegalMove):
+        session.move(bob.player_id, {"step": 1})
+    assert session.version == 2
+    assert session.state is before
+    session.move(ann.player_id, {"step": 1})
+    assert session.version == 3
+
+
+def test_fake_game_finishes():
+    registry = SessionRegistry()
+    session, ann = registry.create(FakeGame(target=3), "Ann")
+    _, bob = session.join("Bob")
+    for pid in (ann.player_id, bob.player_id, ann.player_id):
+        session.move(pid, {"step": 1})
+    assert session.status == "finished"

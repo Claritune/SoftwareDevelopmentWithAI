@@ -29,3 +29,5 @@ export const createSession = (gameId, name) =>
 export const joinSession = (code, name) =>
   request("POST", `/api/sessions/${code}/join`, env("join", { name }));
 export const getSession = (code) => request("GET", `/api/sessions/${code}`);
+export const makeMove = (code, playerId, move) =>
+  request("POST", `/api/sessions/${code}/moves`, env("move", { player_id: playerId, move }));

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from gamer.games.base import IllegalMove, InvalidMove
+
 
 def env(type_: str, payload) -> dict:
     return {"v": 1, "type": type_, "payload": payload}
@@ -22,6 +24,17 @@ class FakeGame:
 
     def initial_state(self) -> FakeState:
         return FakeState()
+
+    def parse_move(self, payload) -> int:
+        if payload != {"step": 1}:
+            raise InvalidMove("expected {'step': 1}")
+        return 1
+
+    def apply_move(self, state: FakeState, seat: int, move: int) -> FakeState:
+        if state.current != seat:
+            raise IllegalMove("not your turn")
+        count = state.count + move
+        return FakeState(count, None if count >= self.target else 1 - seat)
 
     def snapshot(self, state: FakeState) -> dict:
         finished = state.current is None

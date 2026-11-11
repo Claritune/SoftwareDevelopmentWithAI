@@ -7,8 +7,15 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from gamer.games import GAMES
-from gamer.games.base import Game
-from gamer.protocol import ApiError, BadRequest, GameNotFound, NameRequest, envelope
+from gamer.games.base import Game, IllegalMove, InvalidMove
+from gamer.protocol import (
+    ApiError,
+    BadRequest,
+    GameNotFound,
+    MoveRequest,
+    NameRequest,
+    envelope,
+)
 from gamer.sessions import Seat, Session, SessionRegistry
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -31,6 +38,18 @@ def create_app(
             f"Invalid request: {exc.errors()[0]['msg']}" if exc.errors() else "Invalid request"
         )
         return JSONResponse(err.to_envelope(), status_code=err.status)
+
+    @app.exception_handler(InvalidMove)
+    async def handle_invalid_move(request: Request, exc: InvalidMove) -> JSONResponse:
+        return JSONResponse(
+            envelope("error", {"code": "invalid_move", "message": str(exc)}), status_code=400
+        )
+
+    @app.exception_handler(IllegalMove)
+    async def handle_illegal_move(request: Request, exc: IllegalMove) -> JSONResponse:
+        return JSONResponse(
+            envelope("error", {"code": "illegal_move", "message": str(exc)}), status_code=409
+        )
 
     @app.middleware("http")
     async def no_cache_static(request: Request, call_next):
@@ -99,6 +118,12 @@ def create_app(
     @app.get("/api/sessions/{code}")
     async def get_session(code: str) -> dict:
         return envelope("state", registry.get(code).to_payload())
+
+    @app.post("/api/sessions/{code}/moves")
+    async def make_move(code: str, body: MoveRequest) -> dict:
+        session = registry.get(code)
+        session.move(body.payload.player_id, body.payload.move)
+        return envelope("state", session.to_payload())
 
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
     return app

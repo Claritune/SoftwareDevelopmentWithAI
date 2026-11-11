@@ -1174,12 +1174,12 @@ assert sum(state["scores"]) <= 64
 
 ### Verification
 #### Automated
-- [ ] `uv run pytest` passes
-- [ ] `uv run pytest tests/games/test_othello.py -q` passes
-- [ ] `uv run ruff check && uv run ruff format --check` passes
-- [ ] `rg -n -i othello src/gamer/app.py src/gamer/sessions.py src/gamer/protocol.py` prints nothing
-- [ ] `rg -n "fastapi|pydantic|asyncio" src/gamer/games` prints nothing
-- [ ] `rg -n "^\s*def " src/gamer/app.py` shows no route or handler defined with plain `def`; only `create_app` and the local helpers `get_game` and `joined` may match
+- [x] `uv run pytest` passes
+- [x] `uv run pytest tests/games/test_othello.py -q` passes
+- [x] `uv run ruff check && uv run ruff format --check` passes
+- [x] `rg -n -i othello src/gamer/app.py src/gamer/sessions.py src/gamer/protocol.py` prints nothing
+- [x] `rg -n "fastapi|pydantic|asyncio" src/gamer/games` prints nothing
+- [x] `rg -n "^\s*def " src/gamer/app.py` shows no route or handler defined with plain `def`; only `create_app` and the local helpers `get_game` and `joined` may match
 
 #### Manual
 - [ ] `uv run gamer`. Tabs A and B start a session via the lobby. A clicks a highlighted square, and the move shows in B within about 1 s. B's legal squares are highlighted and A's are not.
