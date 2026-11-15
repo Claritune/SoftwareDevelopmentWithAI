@@ -12,7 +12,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["process_batch", "shrinking_demo"]
+py-modules = ["process_batch", "process_batch_fixed", "properties", "shrinking_demo"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
