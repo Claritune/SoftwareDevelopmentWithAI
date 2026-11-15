@@ -2,9 +2,11 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException
 
 from gamer.games import GAMES
 from gamer.games.base import Game, IllegalMove, InvalidMove
@@ -19,6 +21,7 @@ from gamer.protocol import (
 from gamer.sessions import Seat, Session, SessionRegistry
 
 STATIC_DIR = Path(__file__).parent / "static"
+HTTP_ERROR_CODES = {400: "bad_request", 404: "not_found", 405: "method_not_allowed"}
 
 
 def create_app(
@@ -38,6 +41,22 @@ def create_app(
             f"Invalid request: {exc.errors()[0]['msg']}" if exc.errors() else "Invalid request"
         )
         return JSONResponse(err.to_envelope(), status_code=err.status)
+
+    @app.exception_handler(HTTPException)
+    async def handle_http_error(request: Request, exc: HTTPException):
+        if not request.url.path.startswith("/api/"):
+            return await http_exception_handler(request, exc)
+        return JSONResponse(
+            envelope(
+                "error",
+                {
+                    "code": HTTP_ERROR_CODES.get(exc.status_code, "http_error"),
+                    "message": str(exc.detail),
+                },
+            ),
+            status_code=exc.status_code,
+            headers=exc.headers,
+        )
 
     @app.exception_handler(InvalidMove)
     async def handle_invalid_move(request: Request, exc: InvalidMove) -> JSONResponse:
